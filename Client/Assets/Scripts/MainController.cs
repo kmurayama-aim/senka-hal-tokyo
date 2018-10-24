@@ -17,6 +17,8 @@ public class MainController : MonoBehaviour
     GameObject otherPlayerPrefab;
     [SerializeField]
     GameObject itemPrefab;
+    [SerializeField]
+    GameObject superItemPrefab;
 
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
@@ -78,6 +80,10 @@ public class MainController : MonoBehaviour
                         MainThreadExecutor.Enqueue(() => OnSpawn(spawnResponse.Payload));
                         break;
                     }
+                case "update_scale":
+                    var playerScaleUpdateMessage = JsonUtility.FromJson<RPC.UpdatePlayerScale>(eventArgs.Data);
+                    MainThreadExecutor.Enqueue(() => OnPlayerScaleUpdate(playerScaleUpdateMessage));
+                    break;
                 case "delete_item":
                     {
                         var deleteMessage = JsonUtility.FromJson<RPC.DeleteItem>(eventArgs.Data);
@@ -163,7 +169,6 @@ public class MainController : MonoBehaviour
         {
             if (rpcPlayer.Id == playerId)
             {
-                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
                 continue;
             }
 
@@ -173,7 +178,6 @@ public class MainController : MonoBehaviour
             {
                 // 既にGameObjectがいたら更新
                 otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
-                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
             }
             else
             {
@@ -186,6 +190,16 @@ public class MainController : MonoBehaviour
             }
         }
     }
+    void OnPlayerScaleUpdate(RPC.UpdatePlayerScale scale) {
+        if (otherPlayerObjs.ContainsKey(scale.Payload.Player.Id)) {
+            var scaleData = scale.Payload.Player.LocalScale;
+            otherPlayerObjs[scale.Payload.Player.Id].transform.localScale = new Vector3(scaleData.X, scaleData.Y, scaleData.Z);
+        }
+        else if(playerId == scale.Payload.Player.Id) {
+            var scaleData = scale.Payload.Player.LocalScale;
+            playerObj.transform.localScale = new Vector3(scaleData.X, scaleData.Y, scaleData.Z);
+        }
+    }
 
     void OnSpawn(RPC.SpawnPayload payload)
     {
@@ -196,7 +210,15 @@ public class MainController : MonoBehaviour
     void SpawnItem(RPC.Item rpcItem)
     {
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-        var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+        GameObject itemObj = null;
+        switch (rpcItem.type) {
+            case RPC.Item.ItemType.Normal:
+                itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+                break;
+            case RPC.Item.ItemType.Super:
+                itemObj = Instantiate(superItemPrefab, position, Quaternion.identity);
+                break;
+        }
         items.Add(rpcItem.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
@@ -262,11 +284,6 @@ public class MainController : MonoBehaviour
             Destroy(playerObj);
             Invoke("RestartGame", 3);
         }
-    }
-
-    Vector3 CalcPlayerScale(int score)
-    {
-        return Vector3.one + (Vector3.one * score * 0.2f);
     }
 
     void RestartGame()

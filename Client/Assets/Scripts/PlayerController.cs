@@ -3,7 +3,9 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 10.0f; // 速度
+    public float speed = 20.0f; // 速度
+    [SerializeField]
+    bool superCheat = false;
 
     public event Action<int> OnCollision;
 
@@ -21,7 +23,10 @@ public class PlayerController : MonoBehaviour
 
         // 速度の設定
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
-        rb.AddForce(movement * speed);
+        if (superCheat)
+            rb.velocity = movement * speed * 3;
+        else
+            rb.AddForce(movement * speed);
     }
 
     void OnCollisionEnter(Collision collision)

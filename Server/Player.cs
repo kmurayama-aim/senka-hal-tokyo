@@ -7,14 +7,16 @@ namespace WebSocketSample.Server
         public readonly int Uid;
         public readonly string Name;
         public Position Position;
+        public LocalScale LocalScale;
         public int Score;
         public bool isPositionChanged;
 
-        public Player(int uid, string name, Position position, int score)
+        public Player(int uid, string name, Position position, LocalScale localScale, int score)
         {
             Uid = uid;
             Name = name;
             Position = position;
+            LocalScale = localScale;
             Score = score;
         }
 
@@ -26,7 +28,6 @@ namespace WebSocketSample.Server
                 isPositionChanged = true;
             }
         }
-
         public override string ToString()
         {
             return string.Format(

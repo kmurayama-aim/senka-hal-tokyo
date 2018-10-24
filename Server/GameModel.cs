@@ -9,7 +9,7 @@ namespace WebSocketSample.Server
     public class GameModel
     {
         Dictionary<int, Player> players = new Dictionary<int, Player>();
-        Dictionary<int, Item> items = new Dictionary<int, Item>();
+        Dictionary<int, RPC.Item> items = new Dictionary<int, RPC.Item>();
 
         int uidCounter;
 
@@ -41,12 +41,11 @@ namespace WebSocketSample.Server
         {
             Console.WriteLine(">> Login");
 
-            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), 0);
+            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), new LocalScale(1,1,1),0);
             lock (players)
             {
                 players[player.Uid] = player;
             }
-
             var loginResponseRpc = new LoginResponse(new LoginResponsePayload(player.Uid));
             var loginResponseJson = JsonConvert.SerializeObject(loginResponseRpc);
             sendTo(loginResponseJson, senderId);
@@ -74,9 +73,24 @@ namespace WebSocketSample.Server
             var itemId = getItemPayload.ItemId;
             if (items.ContainsKey(itemId))
             {
-                items.Remove(itemId);
-                players[getItemPayload.PlayerId].Score++;
+                var addScore = 0;
+                switch (items[itemId].type) {
+                    case RPC.Item.ItemType.Normal:
+                        addScore += 1;
+                        break;
+                    case RPC.Item.ItemType.Super:
+                        addScore += 3;
+                        break;
+                }
+                var player = players[getItemPayload.PlayerId];
+                player.Score += addScore;
+                player.LocalScale = CalcPlayerScale(players[getItemPayload.PlayerId].Score);
 
+                var playerScaleUpdateRpc = new UpdatePlayerScale(new UpdatePlayerScalePayload(new RPC.Player(player.Uid, player.Position, player.LocalScale, player.Score)));
+                var playerScaleUpdateJson = JsonConvert.SerializeObject(playerScaleUpdateRpc);
+                broadcast(playerScaleUpdateJson);
+
+                items.Remove(itemId);
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
                 var deleteItemJson = JsonConvert.SerializeObject(deleteItemRpc);
                 broadcast(deleteItemJson);
@@ -85,6 +99,10 @@ namespace WebSocketSample.Server
             {
                 Console.WriteLine("Not found ItemId: "+ itemId);
             }
+        }
+        LocalScale CalcPlayerScale(int score) {
+            float mul = score * 0.2f;
+            return new LocalScale(1 + mul, 1 + mul, 1 + mul);
         }
 
         public void OnCollision(string senderId, CollisionPayload payload)
@@ -113,46 +131,55 @@ namespace WebSocketSample.Server
         {
             if (players.Count == 0) return;
 
-            var movedPlayers = new List<RPC.Player>();
+            var updatedPlayers = new List<RPC.Player>();
             lock (players)
             {
                 foreach (var player in players.Values)
                 {
                     if (!player.isPositionChanged) continue;
 
-                    var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
-                    movedPlayers.Add(playerRpc);
+                    var playerRpc = new RPC.Player(player.Uid, player.Position, player.LocalScale, player.Score);
+                    updatedPlayers.Add(playerRpc);
                     player.isPositionChanged = false;
                 }
             }
 
-            if (movedPlayers.Count == 0) return;
+            if (updatedPlayers.Count == 0) return;
 
-            var syncRpc = new Sync(new SyncPayload(movedPlayers));
+            var syncRpc = new Sync(new SyncPayload(updatedPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
         }
 
+        int superTimerCount = 0;
         void StartSpawnTimer()
         {
             var random = new Random();
-            var timer = new Timer(3000);
+            var timer = new Timer(1000);
             timer.Elapsed += (_, __) =>
             {
                 if (players.Count == 0) return;
 
-                var randomX = random.Next(-5, 5);
-                var randomZ = random.Next(-5, 5);
+                var randomX = random.Next(-10, 10);
+                var randomZ = random.Next(-10, 10);
                 var position = new Position(randomX, 0.5f, randomZ);
-                var item = new Item(uidCounter++, position);
-                items.Add(item.Id, item);
+                RPC.Item item = null;
+                lock (timer){
+                    superTimerCount++;
+                    if (superTimerCount % 3 == 0)
+                        item = new RPC.Item(uidCounter++, position, RPC.Item.ItemType.Super);
+                    else
+                        item = new RPC.Item(uidCounter++, position, RPC.Item.ItemType.Normal);
 
-                var rpcItem = new RPC.Item(item.Id, item.Position);
-                var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
+                    items.Add(item.Id, item);
+                }
+
+                var spawnRpc = new Spawn(new SpawnPayload(item));
                 var spawnJson = JsonConvert.SerializeObject(spawnRpc);
                 broadcast(spawnJson);
 
                 Console.WriteLine("<< Spawn");
+                Console.WriteLine(uidCounter);
             };
             timer.Start();
         }
@@ -162,7 +189,7 @@ namespace WebSocketSample.Server
             var itemsRpc = new List<RPC.Item>();
             foreach (var item in items.Values)
             {
-                var itemRpc = new RPC.Item(item.Id, item.Position);
+                var itemRpc = new RPC.Item(item.Id, item.Position, item.type);
                 itemsRpc.Add(itemRpc);
             }
 

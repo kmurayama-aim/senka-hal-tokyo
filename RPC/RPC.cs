@@ -22,17 +22,35 @@ namespace WebSocketSample.RPC
             this.Z = z;
         }
     }
+    [System.Serializable]
+    public class LocalScale {
+        public float X;
+        public float Y;
+        public float Z;
+
+        public LocalScale(float x, float y, float z) {
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+        }
+    }
 
     [System.Serializable]
     public class Item
     {
         public int Id;
         public Position Position;
+        public enum ItemType {
+            Normal = 0,
+            Super = 1,
+        }
+        public ItemType type;
 
-        public Item(int id, Position position)
+        public Item(int id, Position position, ItemType type)
         {
             this.Id = id;
             this.Position = position;
+            this.type = type;
         }
     }
 
@@ -129,18 +147,36 @@ namespace WebSocketSample.RPC
             this.Players = players;
         }
     }
+    [System.Serializable]
+    public class UpdatePlayerScale {
+        public string Method = "update_scale";
+        public UpdatePlayerScalePayload Payload;
+
+        public UpdatePlayerScale(UpdatePlayerScalePayload payload) {
+            this.Payload = payload;
+        }
+    }
+    [System.Serializable]
+    public class UpdatePlayerScalePayload {
+        public Player Player;
+        public UpdatePlayerScalePayload(Player player) {
+            this.Player = player;
+        }
+    }
 
     [System.Serializable]
     public class Player
     {
         public int Id;
         public Position Position;
+        public LocalScale LocalScale;
         public int Score;
 
-        public Player(int id, Position position, int score)
+        public Player(int id, Position position, LocalScale localScale, int score)
         {
             this.Id = id;
             this.Position = position;
+            this.LocalScale = localScale;
             this.Score = score;
         }
     }
