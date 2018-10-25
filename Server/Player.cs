@@ -10,6 +10,7 @@ namespace WebSocketSample.Server
         public LocalScale LocalScale;
         public int Score;
         public bool isPositionChanged;
+        public bool isLocalScaleChanged;
 
         public Player(int uid, string name, Position position, LocalScale localScale, int score)
         {
@@ -27,6 +28,10 @@ namespace WebSocketSample.Server
                 Position = position;
                 isPositionChanged = true;
             }
+        }
+        public void SetLocalScale(LocalScale localScale) {
+            LocalScale = localScale;
+            isLocalScaleChanged = true;
         }
         public override string ToString()
         {

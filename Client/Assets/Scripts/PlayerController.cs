@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    MainController mainControllerSc;
     public float speed = 20.0f; // 速度
-    [SerializeField]
-    bool superCheat = false;
-
     public event Action<int> OnCollision;
 
     void Start()
     {
+        var mainObject = GameObject.Find("Main");
+        mainControllerSc = mainObject.GetComponent<MainController>();
     }
 
     // 固定フレームレートで呼び出されるハンドラ
@@ -23,7 +23,7 @@ public class PlayerController : MonoBehaviour
 
         // 速度の設定
         Vector3 movement = new Vector3(moveHorizontal, 0.0f, moveVertical);
-        if (superCheat)
+        if (mainControllerSc.SuperCheatProp)
             rb.velocity = movement * speed * 3;
         else
             rb.AddForce(movement * speed);

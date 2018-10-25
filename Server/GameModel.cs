@@ -41,7 +41,7 @@ namespace WebSocketSample.Server
         {
             Console.WriteLine(">> Login");
 
-            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), new LocalScale(1,1,1),0);
+            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), new LocalScale(1, 1, 1), 0);
             lock (players)
             {
                 players[player.Uid] = player;
@@ -74,7 +74,8 @@ namespace WebSocketSample.Server
             if (items.ContainsKey(itemId))
             {
                 var addScore = 0;
-                switch (items[itemId].type) {
+                switch (items[itemId].type)
+                {
                     case RPC.Item.ItemType.Normal:
                         addScore += 1;
                         break;
@@ -85,10 +86,10 @@ namespace WebSocketSample.Server
                 var player = players[getItemPayload.PlayerId];
                 player.Score += addScore;
                 player.LocalScale = CalcPlayerScale(players[getItemPayload.PlayerId].Score);
-
-                var playerScaleUpdateRpc = new UpdatePlayerScale(new UpdatePlayerScalePayload(new RPC.Player(player.Uid, player.Position, player.LocalScale, player.Score)));
-                var playerScaleUpdateJson = JsonConvert.SerializeObject(playerScaleUpdateRpc);
-                broadcast(playerScaleUpdateJson);
+                //やりかた、スケールの変更を通知。RPCを変更。Positionのように変更、クライアントも同じく変更
+                //var playerScaleUpdateRpc = new UpdatePlayerScale(new UpdatePlayerScalePayload(new RPC.Player(player.Uid, player.Position, player.LocalScale, player.Score)));
+                //var playerScaleUpdateJson = JsonConvert.SerializeObject(playerScaleUpdateRpc);
+                //broadcast(playerScaleUpdateJson);
 
                 items.Remove(itemId);
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
@@ -97,10 +98,11 @@ namespace WebSocketSample.Server
             }
             else
             {
-                Console.WriteLine("Not found ItemId: "+ itemId);
+                Console.WriteLine("Not found ItemId: " + itemId);
             }
         }
-        LocalScale CalcPlayerScale(int score) {
+        LocalScale CalcPlayerScale(int score)
+        {
             float mul = score * 0.2f;
             return new LocalScale(1 + mul, 1 + mul, 1 + mul);
         }
@@ -136,16 +138,15 @@ namespace WebSocketSample.Server
             {
                 foreach (var player in players.Values)
                 {
-                    if (!player.isPositionChanged) continue;
+                    if (!player.isPositionChanged && !player.isLocalScaleChanged) continue;
 
                     var playerRpc = new RPC.Player(player.Uid, player.Position, player.LocalScale, player.Score);
                     updatedPlayers.Add(playerRpc);
                     player.isPositionChanged = false;
+                    player.isLocalScaleChanged = false;
                 }
             }
-
             if (updatedPlayers.Count == 0) return;
-
             var syncRpc = new Sync(new SyncPayload(updatedPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
@@ -164,7 +165,8 @@ namespace WebSocketSample.Server
                 var randomZ = random.Next(-10, 10);
                 var position = new Position(randomX, 0.5f, randomZ);
                 RPC.Item item = null;
-                lock (timer){
+                lock (timer)
+                {
                     superTimerCount++;
                     if (superTimerCount % 3 == 0)
                         item = new RPC.Item(uidCounter++, position, RPC.Item.ItemType.Super);

@@ -23,12 +23,14 @@ namespace WebSocketSample.RPC
         }
     }
     [System.Serializable]
-    public class LocalScale {
+    public class LocalScale
+    {
         public float X;
         public float Y;
         public float Z;
 
-        public LocalScale(float x, float y, float z) {
+        public LocalScale(float x, float y, float z)
+        {
             this.X = x;
             this.Y = y;
             this.Z = z;
@@ -40,7 +42,8 @@ namespace WebSocketSample.RPC
     {
         public int Id;
         public Position Position;
-        public enum ItemType {
+        public enum ItemType
+        {
             Normal = 0,
             Super = 1,
         }
@@ -145,22 +148,6 @@ namespace WebSocketSample.RPC
         public SyncPayload(List<Player> players)
         {
             this.Players = players;
-        }
-    }
-    [System.Serializable]
-    public class UpdatePlayerScale {
-        public string Method = "update_scale";
-        public UpdatePlayerScalePayload Payload;
-
-        public UpdatePlayerScale(UpdatePlayerScalePayload payload) {
-            this.Payload = payload;
-        }
-    }
-    [System.Serializable]
-    public class UpdatePlayerScalePayload {
-        public Player Player;
-        public UpdatePlayerScalePayload(Player player) {
-            this.Player = player;
         }
     }
 
