@@ -29,7 +29,8 @@ namespace WebSocketSample.Server
                 isPositionChanged = true;
             }
         }
-        public void SetLocalScale(LocalScale localScale) {
+        public void SetLocalScale(LocalScale localScale)
+        {
             LocalScale = localScale;
             isLocalScaleChanged = true;
         }
