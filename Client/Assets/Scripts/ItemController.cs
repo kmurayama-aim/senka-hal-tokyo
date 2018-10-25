@@ -6,6 +6,7 @@ public class ItemController : MonoBehaviour
     [SerializeField]
     Rigidbody rb;
     public event Action OnGet;
+    public event Action<Rigidbody> MoveToPlayer;
     MainController mainControllerSc;
 
     void Awake()
@@ -15,13 +16,7 @@ public class ItemController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (mainControllerSc.SuperCheatProp)
-            GoToPlayer();
-    }
-    void GoToPlayer()
-    {
-        transform.LookAt(mainControllerSc.PlayerObjProp.transform);
-        rb.AddForce(transform.forward * 20);
+        MoveToPlayer(rb);
     }
     void OnTriggerEnter(Collider other)
     {

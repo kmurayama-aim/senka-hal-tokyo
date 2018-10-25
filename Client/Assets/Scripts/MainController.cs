@@ -20,8 +20,7 @@ public class MainController : MonoBehaviour
     [SerializeField]
     GameObject superItemPrefab;
 
-    GameObject playerObj;
-    public GameObject PlayerObjProp { get { return playerObj; } }
+    public GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
     bool superCheat = false;
@@ -235,6 +234,11 @@ public class MainController : MonoBehaviour
             var getItemJson = JsonUtility.ToJson(getItemRpc);
             webSocket.Send(getItemJson);
             Debug.Log(">> GetItem");
+        };
+        item.MoveToPlayer += rb =>
+        {
+            item.transform.LookAt(playerObj.transform);
+            rb.AddForce(item.transform.forward * 20);
         };
     }
 
