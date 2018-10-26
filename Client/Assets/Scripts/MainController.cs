@@ -20,7 +20,7 @@ public class MainController : MonoBehaviour
     [SerializeField]
     GameObject superItemPrefab;
 
-    public GameObject playerObj;
+    GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
     bool superCheat = false;
@@ -175,18 +175,16 @@ public class MainController : MonoBehaviour
             if (rpcPlayer.Id == playerId)
             {
                 //本来はList<Player>をリストで持てるクラスを用意すべきかも。今回はやむなし
-                var playerLocalScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
-                if (playerObj.transform.localScale.x != playerLocalScale.x || playerObj.transform.localScale.y != playerLocalScale.y || playerObj.transform.localScale.z != playerLocalScale.z)
-                    playerObj.transform.localScale = playerLocalScale;
+                playerObj.transform.localScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
                 continue;
             }
 
-            var otherPlayerObj = otherPlayerObjs[rpcPlayer.Id];
             var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
             var otherPlayerLocalScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
             if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
             {
                 // 既にGameObjectがいたら更新
+                var otherPlayerObj = otherPlayerObjs[rpcPlayer.Id];
                 otherPlayerObj.transform.position = otherPlayerPoision;
                 if (otherPlayerObj.transform.localScale.x != otherPlayerLocalScale.x || otherPlayerObj.transform.localScale.y != otherPlayerLocalScale.y || otherPlayerObj.transform.localScale.z != otherPlayerLocalScale.z)
                     otherPlayerObj.transform.localScale = otherPlayerLocalScale;
