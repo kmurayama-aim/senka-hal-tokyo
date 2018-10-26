@@ -17,10 +17,14 @@ public class MainController : MonoBehaviour
     GameObject otherPlayerPrefab;
     [SerializeField]
     GameObject itemPrefab;
+    [SerializeField]
+    GameObject superItemPrefab;
 
-    GameObject playerObj;
+    public GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
     int playerId;
+    bool superCheat = false;
+    public bool SuperCheatProp { get { return superCheat; } }
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
     Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
@@ -47,7 +51,7 @@ public class MainController : MonoBehaviour
         };
 
         // メッセージを受信したときのハンドラ
-        webSocket.OnMessage += (sender, eventArgs) => 
+        webSocket.OnMessage += (sender, eventArgs) =>
         {
             Debug.Log("WebSocket Message: " + eventArgs.Data);
 
@@ -107,11 +111,18 @@ public class MainController : MonoBehaviour
     void Update()
     {
         UpdatePosition();
+        CheatManager();
     }
-
+    void CheatManager()
+    {
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            superCheat = !superCheat;
+        }
+    }
     void OnDestroy()
     {
-        webSocket.Close();    
+        webSocket.Close();
     }
 
     void Login()
@@ -163,25 +174,30 @@ public class MainController : MonoBehaviour
         {
             if (rpcPlayer.Id == playerId)
             {
-                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+                //本来はList<Player>をリストで持てるクラスを用意すべきかも。今回はやむなし
+                var playerLocalScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
+                if (playerObj.transform.localScale.x != playerLocalScale.x || playerObj.transform.localScale.y != playerLocalScale.y || playerObj.transform.localScale.z != playerLocalScale.z)
+                    playerObj.transform.localScale = playerLocalScale;
                 continue;
             }
 
+            var otherPlayerObj = otherPlayerObjs[rpcPlayer.Id];
             var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
-
+            var otherPlayerLocalScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
             if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
             {
                 // 既にGameObjectがいたら更新
-                otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
-                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+                otherPlayerObj.transform.position = otherPlayerPoision;
+                if (otherPlayerObj.transform.localScale.x != otherPlayerLocalScale.x || otherPlayerObj.transform.localScale.y != otherPlayerLocalScale.y || otherPlayerObj.transform.localScale.z != otherPlayerLocalScale.z)
+                    otherPlayerObj.transform.localScale = otherPlayerLocalScale;
             }
             else
             {
                 // GameObjectがいなかったら新規作成
-                var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
-                otherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcPlayer.Id;
-                otherPlayerObj.name = "Other" + rpcPlayer.Id;
-                otherPlayerObjs.Add(rpcPlayer.Id, otherPlayerObj);
+                var newOtherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
+                newOtherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcPlayer.Id;
+                newOtherPlayerObj.name = "Other" + rpcPlayer.Id;
+                otherPlayerObjs.Add(rpcPlayer.Id, newOtherPlayerObj);
                 Debug.Log("Instantiated a new player: " + rpcPlayer.Id);
             }
         }
@@ -196,7 +212,16 @@ public class MainController : MonoBehaviour
     void SpawnItem(RPC.Item rpcItem)
     {
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-        var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+        GameObject itemObj = null;
+        switch (rpcItem.type)
+        {
+            case RPC.Item.ItemType.Normal:
+                itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+                break;
+            case RPC.Item.ItemType.Super:
+                itemObj = Instantiate(superItemPrefab, position, Quaternion.identity);
+                break;
+        }
         items.Add(rpcItem.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
@@ -209,6 +234,11 @@ public class MainController : MonoBehaviour
             var getItemJson = JsonUtility.ToJson(getItemRpc);
             webSocket.Send(getItemJson);
             Debug.Log(">> GetItem");
+        };
+        item.MoveToPlayer += rb =>
+        {
+            item.transform.LookAt(playerObj.transform);
+            rb.AddForce(item.transform.forward * 20);
         };
     }
 
@@ -262,11 +292,6 @@ public class MainController : MonoBehaviour
             Destroy(playerObj);
             Invoke("RestartGame", 3);
         }
-    }
-
-    Vector3 CalcPlayerScale(int score)
-    {
-        return Vector3.one + (Vector3.one * score * 0.2f);
     }
 
     void RestartGame()
