@@ -175,9 +175,7 @@ public class MainController : MonoBehaviour
             if (rpcPlayer.Id == playerId)
             {
                 //本来はList<Player>をリストで持てるクラスを用意すべきかも。今回はやむなし
-                var playerLocalScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
-                if (playerObj.transform.localScale.x != playerLocalScale.x || playerObj.transform.localScale.y != playerLocalScale.y || playerObj.transform.localScale.z != playerLocalScale.z)
-                    playerObj.transform.localScale = playerLocalScale;
+                playerObj.transform.localScale = new Vector3(rpcPlayer.LocalScale.X, rpcPlayer.LocalScale.Y, rpcPlayer.LocalScale.Z);
                 continue;
             }
 
