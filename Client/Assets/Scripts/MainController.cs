@@ -237,8 +237,11 @@ public class MainController : MonoBehaviour
         };
         item.MoveToPlayer += rb =>
         {
-            item.transform.LookAt(playerObj.transform);
-            rb.AddForce(item.transform.forward * 20);
+            if (superCheat)
+            {
+                item.transform.LookAt(playerObj.transform);
+                rb.AddForce(item.transform.forward * 20);
+            }
         };
     }
 
