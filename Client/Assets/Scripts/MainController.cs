@@ -17,6 +17,8 @@ public class MainController : MonoBehaviour
     GameObject otherPlayerPrefab;
     [SerializeField]
     GameObject itemPrefab;
+    [SerializeField]
+    GameObject otherItemPrefab;
 
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
@@ -196,7 +198,17 @@ public class MainController : MonoBehaviour
     void SpawnItem(RPC.Item rpcItem)
     {
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-        var itemObj = Instantiate(itemPrefab, position, Quaternion.identity);
+        var instantiateObj = itemPrefab;
+        switch (rpcItem.Type)
+        {
+            case RPC.ItemType.Normal:
+                instantiateObj = itemPrefab;
+                break;
+            case RPC.ItemType.Other:
+                instantiateObj = otherItemPrefab;
+                break;
+        }
+        var itemObj = Instantiate(instantiateObj, position, Quaternion.identity);
         items.Add(rpcItem.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
