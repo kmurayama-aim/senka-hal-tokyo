@@ -23,15 +23,22 @@ namespace WebSocketSample.RPC
         }
     }
 
+    public enum ItemType
+    {
+        Normal = 0,
+        Other = 1,
+    }
     [System.Serializable]
     public class Item
     {
         public int Id;
+        public ItemType Type;
         public Position Position;
 
-        public Item(int id, Position position)
+        public Item(int id, ItemType type, Position position)
         {
             this.Id = id;
+            this.Type = type;
             this.Position = position;
         }
     }

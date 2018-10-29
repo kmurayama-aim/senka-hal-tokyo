@@ -133,6 +133,7 @@ namespace WebSocketSample.Server
             broadcast(syncJson);
         }
 
+        int itemSpawnConuter = 0;
         void StartSpawnTimer()
         {
             var random = new Random();
@@ -141,13 +142,20 @@ namespace WebSocketSample.Server
             {
                 if (players.Count == 0) return;
 
+                var itemType = new RPC.ItemType();
+                itemSpawnConuter++;
+                if (itemSpawnConuter % 2 == 0)
+                    itemType = ItemType.Normal;
+                else
+                    itemType = ItemType.Other;
+
                 var randomX = random.Next(-5, 5);
                 var randomZ = random.Next(-5, 5);
                 var position = new Position(randomX, 0.5f, randomZ);
-                var item = new Item(uidCounter++, position);
+                var item = new Item(uidCounter++, itemType, position);
                 items.Add(item.Id, item);
 
-                var rpcItem = new RPC.Item(item.Id, item.Position);
+                var rpcItem = new RPC.Item(item.Id, itemType, item.Position);
                 var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
                 var spawnJson = JsonConvert.SerializeObject(spawnRpc);
                 broadcast(spawnJson);
@@ -162,7 +170,7 @@ namespace WebSocketSample.Server
             var itemsRpc = new List<RPC.Item>();
             foreach (var item in items.Values)
             {
-                var itemRpc = new RPC.Item(item.Id, item.Position);
+                var itemRpc = new RPC.Item(item.Id, item.Type, item.Position);
                 itemsRpc.Add(itemRpc);
             }
 
