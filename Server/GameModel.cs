@@ -74,8 +74,18 @@ namespace WebSocketSample.Server
             var itemId = getItemPayload.ItemId;
             if (items.ContainsKey(itemId))
             {
+                var addScore = 0;
+                switch (items[itemId].Type)
+                {
+                    case ItemType.Normal:
+                        addScore = 1;
+                        break;
+                    case ItemType.Rare:
+                        addScore = 3;
+                        break;
+                }
+                players[getItemPayload.PlayerId].Score += addScore;
                 items.Remove(itemId);
-                players[getItemPayload.PlayerId].Score++;
 
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
                 var deleteItemJson = JsonConvert.SerializeObject(deleteItemRpc);
