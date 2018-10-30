@@ -74,17 +74,7 @@ namespace WebSocketSample.Server
             var itemId = getItemPayload.ItemId;
             if (items.ContainsKey(itemId))
             {
-                var addScore = 0;
-                switch (items[itemId].Type)
-                {
-                    case ItemType.Normal:
-                        addScore = 1;
-                        break;
-                    case ItemType.Rare:
-                        addScore = 3;
-                        break;
-                }
-                players[getItemPayload.PlayerId].Score += addScore;
+                players[getItemPayload.PlayerId].Score += GetItemScore(itemId);
                 items.Remove(itemId);
 
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
@@ -95,6 +85,20 @@ namespace WebSocketSample.Server
             {
                 Console.WriteLine("Not found ItemId: "+ itemId);
             }
+        }
+        int GetItemScore(int getItemId)
+        {
+            var score = 0;
+            switch (items[getItemId].Type)
+            {
+                case ItemType.Normal:
+                    score = 1;
+                    break;
+                case ItemType.Rare:
+                    score = 3;
+                    break;
+            }
+            return score;
         }
 
         public void OnCollision(string senderId, CollisionPayload payload)
