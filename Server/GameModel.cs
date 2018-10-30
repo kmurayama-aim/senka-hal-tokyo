@@ -154,7 +154,7 @@ namespace WebSocketSample.Server
 
                 var itemType = new RPC.ItemType();
                 itemSpawnConuter++;
-                if (itemSpawnConuter % 2 == 0)
+                if (itemSpawnConuter % 3 != 0)
                     itemType = ItemType.Normal;
                 else
                     itemType = ItemType.Rare;
