@@ -74,7 +74,7 @@ namespace WebSocketSample.Server
             var itemId = getItemPayload.ItemId;
             if (items.ContainsKey(itemId))
             {
-                players[getItemPayload.PlayerId].Score += GetItemScore(itemId);
+                players[getItemPayload.PlayerId].Score += GetItemScore(items[itemId].Type);
                 items.Remove(itemId);
 
                 var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
@@ -86,10 +86,10 @@ namespace WebSocketSample.Server
                 Console.WriteLine("Not found ItemId: "+ itemId);
             }
         }
-        int GetItemScore(int getItemId)
+        int GetItemScore(ItemType type)
         {
             var score = 0;
-            switch (items[getItemId].Type)
+            switch (type)
             {
                 case ItemType.Normal:
                     score = 1;
