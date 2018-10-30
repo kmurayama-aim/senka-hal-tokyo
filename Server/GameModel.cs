@@ -147,7 +147,7 @@ namespace WebSocketSample.Server
                 if (itemSpawnConuter % 2 == 0)
                     itemType = ItemType.Normal;
                 else
-                    itemType = ItemType.Other;
+                    itemType = ItemType.Rare;
 
                 var randomX = random.Next(-5, 5);
                 var randomZ = random.Next(-5, 5);

@@ -18,7 +18,7 @@ public class MainController : MonoBehaviour
     [SerializeField]
     GameObject itemPrefab;
     [SerializeField]
-    GameObject otherItemPrefab;
+    GameObject rareItemPrefab;
 
     GameObject playerObj;
     Vector3 previousPlayerObjPosition; // 前フレームでの位置
@@ -204,8 +204,8 @@ public class MainController : MonoBehaviour
             case RPC.ItemType.Normal:
                 instantiateObj = itemPrefab;
                 break;
-            case RPC.ItemType.Other:
-                instantiateObj = otherItemPrefab;
+            case RPC.ItemType.Rare:
+                instantiateObj = rareItemPrefab;
                 break;
         }
         var itemObj = Instantiate(instantiateObj, position, Quaternion.identity);

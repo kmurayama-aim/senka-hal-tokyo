@@ -758,7 +758,7 @@ MonoBehaviour:
   otherPlayerPrefab: {fileID: 1000013530691402, guid: 8da97395e89154d00aeaf2c9abf021e2,
     type: 2}
   itemPrefab: {fileID: 1800889081646452, guid: 94eca55f9d12f4d9eb776b8feae42ae5, type: 2}
-  otherItemPrefab: {fileID: 1544332484044282, guid: 3b26ecc49ce4e8340b8ff7291bf15261,
+  rareItemPrefab: {fileID: 1544332484044282, guid: 3b26ecc49ce4e8340b8ff7291bf15261,
     type: 2}
 --- !u!4 &2134770747
 Transform:
