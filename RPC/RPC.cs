@@ -26,7 +26,7 @@ namespace WebSocketSample.RPC
     public enum ItemType
     {
         Normal = 0,
-        Other = 1,
+        Rare = 1,
     }
     [System.Serializable]
     public class Item
