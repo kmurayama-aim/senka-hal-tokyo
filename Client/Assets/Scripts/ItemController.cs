@@ -9,7 +9,7 @@ public class ItemController : MonoBehaviour
     private void FixedUpdate()
     {
         if(OnMove != null)
-            OnMove();//名前これでいいのかな…？そもそもRigidBodyつけてないし…RigidBodyを普通につけた方が良さそう
+            OnMove();
     }
 
     void OnTriggerEnter(Collider other)

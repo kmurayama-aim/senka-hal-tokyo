@@ -198,17 +198,7 @@ public class MainController : MonoBehaviour
     void SpawnItem(RPC.Item rpcItem)
     {
         var position = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-        var instantiateObj = itemPrefab;
-        switch (rpcItem.Type)
-        {
-            case RPC.ItemType.Normal:
-                instantiateObj = itemPrefab;
-                break;
-            case RPC.ItemType.Rare:
-                instantiateObj = rareItemPrefab;
-                break;
-        }
-        var itemObj = Instantiate(instantiateObj, position, Quaternion.identity);
+        var itemObj = Instantiate(GetSpawnItem(rpcItem.Type), position, Quaternion.identity);
         items.Add(rpcItem.Id, itemObj);
 
         var item = itemObj.GetComponent<ItemController>();
@@ -237,6 +227,20 @@ public class MainController : MonoBehaviour
                 rb.velocity = item.transform.right;
             };
         }
+    }
+    GameObject GetSpawnItem(RPC.ItemType type)
+    {
+        var spawnObj = itemPrefab;
+        switch (type)
+        {
+            case RPC.ItemType.Normal:
+                spawnObj = itemPrefab;
+                break;
+            case RPC.ItemType.Rare:
+                spawnObj = rareItemPrefab;
+                break;
+        }
+        return spawnObj;
     }
 
     void OnDeleteItem(RPC.DeleteItemPayload payload)
