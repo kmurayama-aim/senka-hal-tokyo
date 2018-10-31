@@ -222,6 +222,16 @@ public class MainController : MonoBehaviour
             webSocket.Send(getItemJson);
             Debug.Log(">> GetItem");
         };
+
+        if(rpcItem.Type == RPC.ItemType.Rare)
+        {
+            var rb = itemObj.AddComponent<Rigidbody>();
+            rb.useGravity = false;
+            item.OnMove += () =>
+            {
+                rb.velocity = new Vector3(1, 0, 0);
+            };
+        }
     }
 
     void OnDeleteItem(RPC.DeleteItemPayload payload)
