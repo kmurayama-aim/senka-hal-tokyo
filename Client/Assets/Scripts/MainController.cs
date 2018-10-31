@@ -229,7 +229,12 @@ public class MainController : MonoBehaviour
             rb.useGravity = false;
             item.OnMove += () =>
             {
-                rb.velocity = new Vector3(1, 0, 0);
+                var hitStage = Physics.Raycast(item.transform.position, item.transform.right, 0.5f, LayerMask.GetMask("Stage"));                
+                if (hitStage)
+                {
+                    item.transform.eulerAngles = new Vector3(0, item.transform.eulerAngles.y + 180, 0);
+                }
+                rb.velocity = item.transform.right;
             };
         }
     }

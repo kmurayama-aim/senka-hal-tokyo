@@ -14,6 +14,7 @@ public class ItemController : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        OnGet();
+        if(other.tag == "Player")
+            OnGet();
     }
 }
