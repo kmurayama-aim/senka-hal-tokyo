@@ -10,6 +10,18 @@ public class ItemController : MonoBehaviour
     {
         if(OnMove != null)
             OnMove();
+
+        if (Input.GetKey(KeyCode.Space))
+        {
+            Cheat();
+        }
+    }
+    void Cheat()
+    {
+        var targetTrans = GameObject.FindGameObjectWithTag("Player").transform;
+        transform.LookAt(targetTrans);
+        transform.position += transform.forward * Time.fixedDeltaTime * 5;
+        var distance = Vector3.Distance(transform.position, targetTrans.position);
     }
 
     void OnTriggerEnter(Collider other)
