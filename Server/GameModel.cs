@@ -77,7 +77,11 @@ namespace WebSocketSample.Server
                 if (items[itemId].Position.Y != getItemPayload.ItemPosition.Y
                     || items[itemId].Position.Z != getItemPayload.ItemPosition.Z)
                 {
-                    Console.WriteLine(">> Cheat!!!");
+                    var itemSpawnPos = items[getItemPayload.ItemId].Position;
+                    var itemOnGetPos = getItemPayload.ItemPosition;
+                    var itemMoveDistance = new Position(itemSpawnPos.X - itemOnGetPos.X, itemSpawnPos.Y - itemOnGetPos.Y, itemSpawnPos.Z - itemOnGetPos.Z);
+                    Console.WriteLine("Cheat!! PlayerId:{0}, ItemMoveDistance:({1}, {2}, {3})",
+                        getItemPayload.PlayerId, itemMoveDistance.X, itemMoveDistance.Y,itemMoveDistance.Z);
                     return;
                 }
 
