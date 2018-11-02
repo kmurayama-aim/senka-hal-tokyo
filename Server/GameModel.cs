@@ -74,6 +74,13 @@ namespace WebSocketSample.Server
             var itemId = getItemPayload.ItemId;
             if (items.ContainsKey(itemId))
             {
+                if (items[itemId].Position.Y != getItemPayload.ItemPosition.Y
+                    || items[itemId].Position.Z != getItemPayload.ItemPosition.Z)
+                {
+                    Console.WriteLine(">> Cheat!!!");
+                    return;
+                }
+
                 players[getItemPayload.PlayerId].Score += GetItemScore(items[itemId].Type);
                 items.Remove(itemId);
 
