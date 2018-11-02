@@ -215,11 +215,13 @@ namespace WebSocketSample.RPC
     {
         public int ItemId;
         public int PlayerId;
+        public Position ItemPosition;
 
-        public GetItemPayload(int itemId, int playerId)
+        public GetItemPayload(int itemId, int playerId, Position itemPosition)
         {
             this.ItemId = itemId;
             this.PlayerId = playerId;
+            this.ItemPosition = itemPosition;
         }
     }
 

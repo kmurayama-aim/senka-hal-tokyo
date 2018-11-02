@@ -207,7 +207,8 @@ public class MainController : MonoBehaviour
             items.Remove(rpcItem.Id);
             Destroy(itemObj);
 
-            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(rpcItem.Id, playerId));
+            var itemPos = itemObj.transform.position;
+            var getItemRpc = new RPC.GetItem(new RPC.GetItemPayload(rpcItem.Id, playerId, new RPC.Position(itemPos.x, itemPos.y, itemPos.z)));
             var getItemJson = JsonUtility.ToJson(getItemRpc);
             webSocket.Send(getItemJson);
             Debug.Log(">> GetItem");
