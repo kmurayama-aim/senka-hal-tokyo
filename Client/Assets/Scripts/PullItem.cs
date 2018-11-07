@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PullItem : MonoBehaviour
 {
@@ -21,17 +22,16 @@ public class PullItem : MonoBehaviour
     }
     void Cheat()
     {
+        var allObjs = GameObject.FindObjectsOfType(typeof(GameObject)) as IEnumerable<GameObject>;
         var playerTagName = "Player";
-        if (GameObject.FindGameObjectWithTag(playerTagName) == null)
+        if (!allObjs.Any(obj => obj.tag == playerTagName))
             return;
 
-        var playerObj = GameObject.FindGameObjectWithTag(playerTagName);
-        var allObj = GameObject.FindObjectsOfType(typeof(GameObject));
-
-        foreach(GameObject obj in allObj)
+        var playerObj = allObjs.First(obj => obj.tag == playerTagName);
+        var itemObjs = allObjs.Where(obj => obj.GetComponent<ItemController>());
+        foreach(var itemObj in itemObjs)
         {
-            if (obj.GetComponent<ItemController>())
-                MoveItemToPlayer(obj.transform, playerObj.transform);
+            MoveItemToPlayer(itemObj.transform, playerObj.transform);
         }
     }
     void MoveItemToPlayer(Transform itemTrans, Transform playerTrans)

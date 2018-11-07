@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Timers;
 using Newtonsoft.Json;
 using WebSocketSample.RPC;
+using System.Linq;
 
 namespace WebSocketSample.Server
 {
@@ -141,10 +142,9 @@ namespace WebSocketSample.Server
             var movedPlayers = new List<RPC.Player>();
             lock (players)
             {
-                foreach (var player in players.Values)
+                var isPositionChangedPlayers = players.Values.Where(player => player.isPositionChanged);
+                foreach (var player in isPositionChangedPlayers)
                 {
-                    if (!player.isPositionChanged) continue;
-
                     var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
                     movedPlayers.Add(playerRpc);
                     player.isPositionChanged = false;

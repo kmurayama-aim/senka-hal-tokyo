@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
+using System.Linq;
 
 public class MainController : MonoBehaviour
 {
@@ -161,31 +162,34 @@ public class MainController : MonoBehaviour
     void OnSync(RPC.SyncPayload payload)
     {
         Debug.Log("<< Sync");
-        foreach (var rpcPlayer in payload.Players)
+
+        var rpcPlayers = payload.Players.Where(rpcPlayer => rpcPlayer.Id == playerId);
+        foreach (var rpcPlayer in rpcPlayers)
         {
-            if (rpcPlayer.Id == playerId)
-            {
-                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
-                continue;
-            }
+            playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+        }
 
-            var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
+        var rpcOtherPlayers = payload.Players.Where(rpcPlayer => rpcPlayer.Id != playerId);
+        var existRpcOtherPlayers = rpcOtherPlayers.Where(otherPlayer => otherPlayerObjs.ContainsKey(otherPlayer.Id));
+        var nullRpcOtherPlayers = rpcOtherPlayers.Where(otherPlayer => !otherPlayerObjs.ContainsKey(otherPlayer.Id));
+        foreach (var rpcOtherPlayer in existRpcOtherPlayers)
+        {
+            var otherPlayerPoision = new Vector3(rpcOtherPlayer.Position.X, rpcOtherPlayer.Position.Y, rpcOtherPlayer.Position.Z);
 
-            if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
-            {
-                // 既にGameObjectがいたら更新
-                otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
-                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
-            }
-            else
-            {
-                // GameObjectがいなかったら新規作成
-                var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
-                otherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcPlayer.Id;
-                otherPlayerObj.name = "Other" + rpcPlayer.Id;
-                otherPlayerObjs.Add(rpcPlayer.Id, otherPlayerObj);
-                Debug.Log("Instantiated a new player: " + rpcPlayer.Id);
-            }
+            // 既にGameObjectがいたら更新
+            otherPlayerObjs[rpcOtherPlayer.Id].transform.position = otherPlayerPoision;
+            otherPlayerObjs[rpcOtherPlayer.Id].transform.localScale = CalcPlayerScale(rpcOtherPlayer.Score);
+        }
+        foreach (var rpcOtherPlayer in nullRpcOtherPlayers)
+        {
+            var otherPlayerPoision = new Vector3(rpcOtherPlayer.Position.X, rpcOtherPlayer.Position.Y, rpcOtherPlayer.Position.Z);
+
+            // GameObjectがいなかったら新規作成
+            var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
+            otherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcOtherPlayer.Id;
+            otherPlayerObj.name = "Other" + rpcOtherPlayer.Id;
+            otherPlayerObjs.Add(rpcOtherPlayer.Id, otherPlayerObj);
+            Debug.Log("Instantiated a new player: " + rpcOtherPlayer.Id);
         }
     }
 
@@ -259,14 +263,7 @@ public class MainController : MonoBehaviour
     {
         Debug.Log("<< Environment");
 
-        var serverUnknownItems = new List<KeyValuePair<int, GameObject>>();
-        // サーバーからのリスト(payload.Items)にないアイテムを所持していたらserverUnknownItemsに追加
-        foreach (var item in items)
-        {
-            if (payload.Items.Exists(itemRpc => itemRpc.Id == item.Key)) continue;
-
-            serverUnknownItems.Add(item);
-        }
+        var serverUnknownItems = items.Where(item => payload.Items.Exists(itemRpc => itemRpc.Id == item.Key));
         // serverUnknownItemsをクライアントから削除
         foreach (var item in serverUnknownItems)
         {
@@ -274,10 +271,9 @@ public class MainController : MonoBehaviour
             Destroy(item.Value);
         }
 
-        foreach (var rpcItem in payload.Items)
+        var spawnItems = payload.Items.Where(rpcItem => !items.ContainsKey(rpcItem.Id));
+        foreach (var rpcItem in spawnItems)
         {
-            if (items.ContainsKey(rpcItem.Id)) continue;
-
             SpawnItem(rpcItem);
         }
     }
