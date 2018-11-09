@@ -137,23 +137,20 @@ namespace WebSocketSample.Server
 
         void Sync()
         {
-            if (players.Count == 0) return;
-
-            var movedPlayers = new List<RPC.Player>();
+            var movedPlayers = new List<Player>();
             lock (players)
             {
-                var isPositionChangedPlayers = players.Values.Where(player => player.isPositionChanged);
-                foreach (var player in isPositionChangedPlayers)
+                movedPlayers = players.Values.Where(player => player.isPositionChanged).ToList();
+                foreach (var player in movedPlayers)
                 {
-                    var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
-                    movedPlayers.Add(playerRpc);
                     player.isPositionChanged = false;
                 }
             }
 
             if (movedPlayers.Count == 0) return;
 
-            var syncRpc = new Sync(new SyncPayload(movedPlayers));
+            var movedRpcPlayers = movedPlayers.Select(player => new RPC.Player(player.Uid, player.Position, player.Score)).ToList();
+            var syncRpc = new Sync(new SyncPayload(movedRpcPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
         }

@@ -162,34 +162,31 @@ public class MainController : MonoBehaviour
     void OnSync(RPC.SyncPayload payload)
     {
         Debug.Log("<< Sync");
-
-        var rpcPlayers = payload.Players.Where(rpcPlayer => rpcPlayer.Id == playerId);
-        foreach (var rpcPlayer in rpcPlayers)
+        foreach (var rpcPlayer in payload.Players)
         {
-            playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
-        }
+            if (rpcPlayer.Id == playerId)
+            {
+                playerObj.transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+                continue;
+            }
 
-        var rpcOtherPlayers = payload.Players.Where(rpcPlayer => rpcPlayer.Id != playerId);
-        var existRpcOtherPlayers = rpcOtherPlayers.Where(otherPlayer => otherPlayerObjs.ContainsKey(otherPlayer.Id));
-        var nullRpcOtherPlayers = rpcOtherPlayers.Where(otherPlayer => !otherPlayerObjs.ContainsKey(otherPlayer.Id));
-        foreach (var rpcOtherPlayer in existRpcOtherPlayers)
-        {
-            var otherPlayerPoision = new Vector3(rpcOtherPlayer.Position.X, rpcOtherPlayer.Position.Y, rpcOtherPlayer.Position.Z);
+            var otherPlayerPoision = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
 
-            // 既にGameObjectがいたら更新
-            otherPlayerObjs[rpcOtherPlayer.Id].transform.position = otherPlayerPoision;
-            otherPlayerObjs[rpcOtherPlayer.Id].transform.localScale = CalcPlayerScale(rpcOtherPlayer.Score);
-        }
-        foreach (var rpcOtherPlayer in nullRpcOtherPlayers)
-        {
-            var otherPlayerPoision = new Vector3(rpcOtherPlayer.Position.X, rpcOtherPlayer.Position.Y, rpcOtherPlayer.Position.Z);
-
-            // GameObjectがいなかったら新規作成
-            var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
-            otherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcOtherPlayer.Id;
-            otherPlayerObj.name = "Other" + rpcOtherPlayer.Id;
-            otherPlayerObjs.Add(rpcOtherPlayer.Id, otherPlayerObj);
-            Debug.Log("Instantiated a new player: " + rpcOtherPlayer.Id);
+            if (otherPlayerObjs.ContainsKey(rpcPlayer.Id))
+            {
+                // 既にGameObjectがいたら更新
+                otherPlayerObjs[rpcPlayer.Id].transform.position = otherPlayerPoision;
+                otherPlayerObjs[rpcPlayer.Id].transform.localScale = CalcPlayerScale(rpcPlayer.Score);
+            }
+            else
+            {
+                // GameObjectがいなかったら新規作成
+                var otherPlayerObj = Instantiate(otherPlayerPrefab, otherPlayerPoision, Quaternion.identity) as GameObject;
+                otherPlayerObj.GetComponent<OtherPlayerController>().Id = rpcPlayer.Id;
+                otherPlayerObj.name = "Other" + rpcPlayer.Id;
+                otherPlayerObjs.Add(rpcPlayer.Id, otherPlayerObj);
+                Debug.Log("Instantiated a new player: " + rpcPlayer.Id);
+            }
         }
     }
 
@@ -233,6 +230,13 @@ public class MainController : MonoBehaviour
             };
         }
     }
+    void SpawnItem(IEnumerable<RPC.Item> rpcItems)
+    {
+        foreach (var rpcItem in rpcItems)
+        {
+            SpawnItem(rpcItem);
+        }
+    }
     GameObject GetSpawnItem(RPC.ItemType type)
     {
         var spawnObj = itemPrefab;
@@ -272,10 +276,7 @@ public class MainController : MonoBehaviour
         }
 
         var spawnItems = payload.Items.Where(rpcItem => !items.ContainsKey(rpcItem.Id));
-        foreach (var rpcItem in spawnItems)
-        {
-            SpawnItem(rpcItem);
-        }
+        SpawnItem(spawnItems);
     }
 
     void OnDeletePlayer(RPC.DeletePlayerPayload payload)
