@@ -135,22 +135,26 @@ namespace WebSocketSample.Server
             broadcast(deletePlayerJson);
         }
 
+        RPC.Player GetRpcPlayer(Player player)
+        {
+            var rpcPlayer = new RPC.Player(player.Uid, player.Position, player.Score);
+            player.isPositionChanged = false;
+            return rpcPlayer;
+        }
         void Sync()
         {
-            var movedPlayers = new List<Player>();
+            var rpcPlayers = new List<RPC.Player>();
             lock (players)
             {
-                movedPlayers = players.Values.Where(player => player.isPositionChanged).ToList();
-                foreach (var player in movedPlayers)
-                {
-                    player.isPositionChanged = false;
-                }
+                rpcPlayers = players.Values
+                    .Where(player => player.isPositionChanged)
+                    .Select(player => GetRpcPlayer(player))
+                    .ToList();
             }
 
-            if (movedPlayers.Count == 0) return;
+            if (!rpcPlayers.Any()) return;
 
-            var movedRpcPlayers = movedPlayers.Select(player => new RPC.Player(player.Uid, player.Position, player.Score)).ToList();
-            var syncRpc = new Sync(new SyncPayload(movedRpcPlayers));
+            var syncRpc = new Sync(new SyncPayload(rpcPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
         }
@@ -187,14 +191,16 @@ namespace WebSocketSample.Server
             timer.Start();
         }
 
+        RPC.Item GetRpcItem(Item item)
+        {
+            var rpcItem = new RPC.Item(item.Id, item.Type, item.Position);
+            return rpcItem;
+        }
         void Environment(string id)
         {
-            var itemsRpc = new List<RPC.Item>();
-            foreach (var item in items.Values)
-            {
-                var itemRpc = new RPC.Item(item.Id, item.Type, item.Position);
-                itemsRpc.Add(itemRpc);
-            }
+            var itemsRpc = items.Values
+                .Select(item => GetRpcItem(item))
+                .ToList();
 
             var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
             var environmentJson = JsonConvert.SerializeObject(environmentRpc);
