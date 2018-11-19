@@ -138,18 +138,30 @@ namespace WebSocketSample.Server
         RPC.Player GetRpcPlayer(Player player)
         {
             var rpcPlayer = new RPC.Player(player.Uid, player.Position, player.Score);
-            player.isPositionChanged = false;
             return rpcPlayer;
+        }
+        void ClearPlayerDirtyFlag(IEnumerable<Player> players)
+        {
+            foreach (var player in players)
+            {
+                player.isPositionChanged = false;
+            }
         }
         void Sync()
         {
             var rpcPlayers = new List<RPC.Player>();
             lock (players)
             {
-                rpcPlayers = players.Values
+                //isPositionChangedの初期化を行うため処理を分ける
+                var movedPlayers = players.Values
                     .Where(player => player.isPositionChanged)
+                    .ToList();
+
+                rpcPlayers = movedPlayers
                     .Select(player => GetRpcPlayer(player))
                     .ToList();
+
+                ClearPlayerDirtyFlag(movedPlayers);
             }
 
             if (!rpcPlayers.Any()) return;
@@ -198,11 +210,11 @@ namespace WebSocketSample.Server
         }
         void Environment(string id)
         {
-            var itemsRpc = items.Values
+            var rpcItems = items.Values
                 .Select(item => GetRpcItem(item))
                 .ToList();
 
-            var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
+            var environmentRpc = new RPC.Environment(new EnvironmentPayload(rpcItems));
             var environmentJson = JsonConvert.SerializeObject(environmentRpc);
             sendTo(environmentJson, id);
         }
