@@ -793,4 +793,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7cc3511b2079084d9dcf69b7b0f027b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  connectAddress: 10.0.75.1:5678
+  connectAddress: ws://10.0.75.1:5678
