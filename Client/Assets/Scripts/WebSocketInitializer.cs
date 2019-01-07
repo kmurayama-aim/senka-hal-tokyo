@@ -9,28 +9,29 @@ public class WebSocketInitializer : MonoBehaviour
     WebSocket webSocket;    // WebSocketコネクション
     [SerializeField]
     string connectAddress;
+    [SerializeField]
+    WebSocketSetEvents setEvents;
 
     void Start()
     {
         webSocket = new WebSocket(connectAddress);
-        var mainControllerSc = GameObject.Find("Main").GetComponent<MainController>();
 
         // コネクションを確立したときのハンドラ
         webSocket.OnOpen += (sender, eventArgs) =>
         {
-            Debug.Log("WebSocket Opened");
+            setEvents.OnOpen();
         };
 
         // エラーが発生したときのハンドラ
         webSocket.OnError += (sender, eventArgs) =>
         {
-            Debug.Log("WebSocket Error Message: " + eventArgs.Message);
+            setEvents.OnError(eventArgs.Message);
         };
 
         // コネクションを閉じたときのハンドラ
         webSocket.OnClose += (sender, eventArgs) =>
         {
-            Debug.Log("WebSocket Closed");
+            setEvents.OnClose();
         };
 
         // メッセージを受信したときのハンドラ
@@ -49,57 +50,32 @@ public class WebSocketInitializer : MonoBehaviour
                     }
                 case "login_response":
                     {
-                        var loginResponse = JsonUtility.FromJson<RPC.LoginResponse>(eventArgs.Data);
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnLoginResponse(loginResponse.Payload.Id));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnLoginResponse(eventArgs.Data));
                         break;
                     }
                 case "sync":
                     {
-                        var syncMessage = JsonUtility.FromJson<RPC.Sync>(eventArgs.Data);
-                        var players = new List<Player>();
-                        foreach (var rpcPlayer in syncMessage.Payload.Players)//Linqチャンス！！
-                        {
-                            var pos = new Vector3(rpcPlayer.Position.X, rpcPlayer.Position.Y, rpcPlayer.Position.Z);
-                            var player = new Player(rpcPlayer.Id, rpcPlayer.Score, pos);
-                            players.Add(player);
-                        }
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnSync(players));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnSync(eventArgs.Data));
                         break;
                     }
                 case "spawn":
                     {
-                        var spawnResponse = JsonUtility.FromJson<RPC.Spawn>(eventArgs.Data);
-
-                        var pos = new Vector3(spawnResponse.Payload.Item.Position.X, spawnResponse.Payload.Item.Position.Y, spawnResponse.Payload.Item.Position.Z);
-                        var item = new Item(spawnResponse.Payload.Item.Id, pos);
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnSpawn(item));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnSpawn(eventArgs.Data));
                         break;
                     }
                 case "delete_item":
                     {
-                        var deleteMessage = JsonUtility.FromJson<RPC.DeleteItem>(eventArgs.Data);
-                        var deleteItem = new DeleteItem(deleteMessage.Payload.ItemId);
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeleteItem(deleteItem));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnDeleteItem(eventArgs.Data));
                         break;
                     }
                 case "environment":
                     {
-                        var environmentMessage = JsonUtility.FromJson<RPC.Environment>(eventArgs.Data);
-                        var items = new List<Item>();
-                        foreach (var rpcItem in environmentMessage.Payload.Items)
-                        {
-                            var pos = new Vector3(rpcItem.Position.X, rpcItem.Position.Y, rpcItem.Position.Z);
-                            var item = new Item(rpcItem.Id, pos);
-                            items.Add(item);
-                        }
-                        var environment = new Environment(items);
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnEnvironment(environment));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnEnvironment(eventArgs.Data));
                         break;
                     }
                 case "delete_player":
                     {
-                        var deletePlayerMessage = JsonUtility.FromJson<RPC.DeletePlayer>(eventArgs.Data);
-                        MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeletePlayer(deletePlayerMessage.Payload.Id));
+                        MainThreadExecutor.Enqueue(() => setEvents.OnDeletePlayer(eventArgs.Data));
                         break;
                     }
             }
@@ -107,7 +83,7 @@ public class WebSocketInitializer : MonoBehaviour
 
         webSocket.Connect();
 
-        mainControllerSc.Login();
+        setEvents.Login();
     }
     void OnDestroy()
     {
