@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Item
 {
-    public int Id;
-    public Vector3 Position;
+    public int Id { get; private set; }
+    public Vector3 Position { get; private set; }
 
     public Item(int id, Vector3 position)
     {

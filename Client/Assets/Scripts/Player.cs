@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class Player
 {
-    public int Id;
-    public int Score;
-    public Vector3 Position;
+    public int Id { get; private set; }
+    public int Score { get; private set; }
+    public Vector3 Position { get; private set; }
 
     public Player(int id, int score, Vector3 pos)
     {

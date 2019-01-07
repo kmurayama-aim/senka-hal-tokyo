@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class DeleteItem
 {
-    public int Id;
+    public int Id { get; private set; }
     public DeleteItem(int id)
     {
         this.Id = id;
