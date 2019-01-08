@@ -175,7 +175,7 @@ public class MainController : MonoBehaviour
 
     void RestartGame()
     {
-        messageSenderToServer.SendGameEndMessage();
+        messageSenderToServer.SendLogoutMessage();
         MainThreadExecutor.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
