@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Environment
 {
-    public List<Item> Items { get; private set; }
-    public Environment(List<Item> items)
+    public IEnumerable<Item> Items { get; private set; }
+    public Environment(IEnumerable<Item> items)
     {
         this.Items = items;
     }

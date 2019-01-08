@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 public class MainController : MonoBehaviour
 {
@@ -144,7 +145,7 @@ public class MainController : MonoBehaviour
         // サーバーからのリスト(payload.Items)にないアイテムを所持していたらserverUnknownItemsに追加
         foreach (var item in items)
         {
-            if (environment.Items.Exists(itemRpc => itemRpc.Id == item.Key)) continue;
+            if (environment.Items.Any(itemRpc => itemRpc.Id == item.Key)) continue;
 
             serverUnknownItems.Add(item);
         }
