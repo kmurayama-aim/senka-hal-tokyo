@@ -78,9 +78,4 @@ public class WebSocketSetEvents : MonoBehaviour
         var deletePlayerMessage = JsonUtility.FromJson<RPC.DeletePlayer>(message);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeletePlayer(deletePlayerMessage.Payload.Id));
     }
-
-    public void Login()
-    {
-        mainControllerSc.Login();
-    }
 }

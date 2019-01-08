@@ -21,6 +21,11 @@ public class MainController : MonoBehaviour
     [SerializeField]
     MessageSenderToServer messageSenderToServer; //WebSocketInitializerがStartでイベントを登録する前に参照が無いとエラー
 
+    void Start()
+    {
+        Login();
+    }
+
     void Update()
     {
         UpdatePosition();
@@ -28,6 +33,8 @@ public class MainController : MonoBehaviour
 
     public void Login()
     {
+        WebSocketInitializer socketInitializer = GetComponent<WebSocketInitializer>();
+        socketInitializer.Initialize();
         messageSenderToServer.SendLoginMessage("PlayerName");
     }
 

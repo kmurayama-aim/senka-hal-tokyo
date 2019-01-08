@@ -12,7 +12,7 @@ public class WebSocketInitializer : MonoBehaviour
     [SerializeField]
     WebSocketSetEvents setEvents;
 
-    void Start()
+    public void Initialize()
     {
         webSocket = new WebSocket(connectAddress);
 
@@ -82,8 +82,6 @@ public class WebSocketInitializer : MonoBehaviour
         };
 
         webSocket.Connect();
-
-        setEvents.Login();
     }
     void OnDestroy()
     {
