@@ -19,10 +19,12 @@ public class MainController : MonoBehaviour
     Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
     WebSocketInitializer socketInitializer;
+    JsonMessageCreater jsonMessageCreater;
 
     void Awake()
     {
         socketInitializer = GetComponent<WebSocketInitializer>();
+        jsonMessageCreater = new JsonMessageCreater();
     }
 
     void Update()
@@ -32,7 +34,7 @@ public class MainController : MonoBehaviour
 
     public void Login()
     {
-        var jsonMessage = socketInitializer.CreateLoginMessage("PlayerName");
+        var jsonMessage = jsonMessageCreater.CreateLoginMessage("PlayerName");
         Debug.Log(jsonMessage);
 
         socketInitializer.Send(jsonMessage);
@@ -49,7 +51,7 @@ public class MainController : MonoBehaviour
         var playerController = playerObj.GetComponent<PlayerController>();
         playerController.OnCollision += (otherPlayerId) =>
         {
-            var collisionJson = socketInitializer.CreateCollisionMessage(playerId, otherPlayerId);
+            var collisionJson = jsonMessageCreater.CreateCollisionMessage(playerId, otherPlayerId);
             socketInitializer.Send(collisionJson);
         };
     }
@@ -65,7 +67,7 @@ public class MainController : MonoBehaviour
 
         previousPlayerObjPosition = currentPlayerPosition;
 
-        var jsonMessage = socketInitializer.CreatePlayerUpdateMessage(currentPlayerPosition, playerId);
+        var jsonMessage = jsonMessageCreater.CreatePlayerUpdateMessage(currentPlayerPosition, playerId);
         Debug.Log(jsonMessage);
         socketInitializer.Send(jsonMessage);
     }
@@ -120,7 +122,7 @@ public class MainController : MonoBehaviour
             items.Remove(item.Id);
             Destroy(itemObj);
 
-            var getItemJson = socketInitializer.CreateGetItemMessage(item.Id, playerId);
+            var getItemJson = jsonMessageCreater.CreateGetItemMessage(item.Id, playerId);
             socketInitializer.Send(getItemJson);
             Debug.Log(">> GetItem");
         };
