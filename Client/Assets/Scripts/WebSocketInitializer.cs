@@ -50,32 +50,32 @@ public class WebSocketInitializer : MonoBehaviour
                     }
                 case "login_response":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnLoginResponse(eventArgs.Data));
+                        setEvents.OnLoginResponse(eventArgs.Data);
                         break;
                     }
                 case "sync":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnSync(eventArgs.Data));
+                        setEvents.OnSync(eventArgs.Data);
                         break;
                     }
                 case "spawn":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnSpawn(eventArgs.Data));
+                        setEvents.OnSpawn(eventArgs.Data);
                         break;
                     }
                 case "delete_item":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnDeleteItem(eventArgs.Data));
+                        setEvents.OnDeleteItem(eventArgs.Data);
                         break;
                     }
                 case "environment":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnEnvironment(eventArgs.Data));
+                        setEvents.OnEnvironment(eventArgs.Data);
                         break;
                     }
                 case "delete_player":
                     {
-                        MainThreadExecutor.Enqueue(() => setEvents.OnDeletePlayer(eventArgs.Data));
+                        setEvents.OnDeletePlayer(eventArgs.Data);
                         break;
                     }
             }
