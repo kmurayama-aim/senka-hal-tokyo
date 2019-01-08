@@ -18,14 +18,8 @@ public class MainController : MonoBehaviour
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
     Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
-    WebSocketInitializer socketInitializer;
-    JsonMessageCreater jsonMessageCreater;
-
-    void Awake()
-    {
-        socketInitializer = GetComponent<WebSocketInitializer>();
-        jsonMessageCreater = new JsonMessageCreater();
-    }
+    [SerializeField]
+    MessageSenderToServer messageSenderToServer; //WebSocketInitializerがStartでイベントを登録する前に参照が無いとエラー
 
     void Update()
     {
@@ -34,11 +28,7 @@ public class MainController : MonoBehaviour
 
     public void Login()
     {
-        var jsonMessage = jsonMessageCreater.CreateLoginMessage("PlayerName");
-        Debug.Log(jsonMessage);
-
-        socketInitializer.Send(jsonMessage);
-        Debug.Log(">> Login");
+        messageSenderToServer.SendLoginMessage("PlayerName");
     }
 
     public void OnLoginResponse(int playerId)
@@ -47,12 +37,12 @@ public class MainController : MonoBehaviour
         this.playerId = playerId;
         Debug.Log(playerId);
         playerObj = Instantiate(playerPrefab, new Vector3(0.0f, 0.5f, 0.0f), Quaternion.identity) as GameObject;
-
         var playerController = playerObj.GetComponent<PlayerController>();
+
+        //PlayerControllerに任せたい
         playerController.OnCollision += (otherPlayerId) =>
         {
-            var collisionJson = jsonMessageCreater.CreateCollisionMessage(playerId, otherPlayerId);
-            socketInitializer.Send(collisionJson);
+            messageSenderToServer.SendPlayerOnCollisionMessage(playerId, otherPlayerId);
         };
     }
 
@@ -67,9 +57,7 @@ public class MainController : MonoBehaviour
 
         previousPlayerObjPosition = currentPlayerPosition;
 
-        var jsonMessage = jsonMessageCreater.CreatePlayerUpdateMessage(currentPlayerPosition, playerId);
-        Debug.Log(jsonMessage);
-        socketInitializer.Send(jsonMessage);
+        messageSenderToServer.SendUpdatePositionMessage(currentPlayerPosition, playerId);
     }
 
     public void OnSync(List<Player> players)
@@ -117,14 +105,14 @@ public class MainController : MonoBehaviour
         items.Add(item.Id, itemObj);
 
         var itemSc = itemObj.GetComponent<ItemController>();
+
+        //ItemScに任せたい
         itemSc.OnGet += () =>
         {
             items.Remove(item.Id);
             Destroy(itemObj);
 
-            var getItemJson = jsonMessageCreater.CreateGetItemMessage(item.Id, playerId);
-            socketInitializer.Send(getItemJson);
-            Debug.Log(">> GetItem");
+            messageSenderToServer.SendItemOnGetMessage(item.Id, playerId);
         };
     }
 
@@ -187,7 +175,7 @@ public class MainController : MonoBehaviour
 
     void RestartGame()
     {
-        socketInitializer.Close();
+        messageSenderToServer.SendGameEndMessage();
         MainThreadExecutor.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
