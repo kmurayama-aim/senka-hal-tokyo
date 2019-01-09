@@ -7,11 +7,10 @@ using RPC = WebSocketSample.RPC;
 public class WebSocketInitializer
 {
     WebSocket webSocket;    // WebSocketコネクション
-    WebSocketSetEvents setEvents;
+    WebSocketSetEvents setEvents = new WebSocketSetEvents();
 
     public void Initialize(string connectAddress)
     {
-        setEvents = new WebSocketSetEvents();
         webSocket = new WebSocket(connectAddress);
         var jsonMessageExtractor = new JsonMessageExtractor();
 
