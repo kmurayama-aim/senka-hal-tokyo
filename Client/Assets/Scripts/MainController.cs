@@ -186,6 +186,7 @@ public class MainController : MonoBehaviour
         MainThreadExecutor.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
+
     void OnDestroy()
     {
         messageSenderToServer.SendLogoutMessage();

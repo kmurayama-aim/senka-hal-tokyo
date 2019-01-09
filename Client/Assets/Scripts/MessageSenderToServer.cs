@@ -37,6 +37,7 @@ public class MessageSenderToServer
         socketInitializer.Send(getItemJson);
         Debug.Log(">> GetItem");
     }
+
     public void SendLogoutMessage()
     {
         socketInitializer.Close();

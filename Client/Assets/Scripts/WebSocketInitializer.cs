@@ -80,10 +80,12 @@ public class WebSocketInitializer
 
         webSocket.Connect();
     }
+
     public void Send(string message)
     {
         webSocket.Send(message);
     }
+
     public void Close()
     {
         webSocket.Close();

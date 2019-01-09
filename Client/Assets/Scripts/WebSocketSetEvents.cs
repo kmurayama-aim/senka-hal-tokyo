@@ -21,6 +21,7 @@ public class WebSocketSetEvents
     {
         Debug.Log("WebSocket Error Message: " + message);
     }
+
     public void OnClose()
     {
         Debug.Log("WebSocket Closed");
@@ -31,11 +32,13 @@ public class WebSocketSetEvents
         var pong = jsonMessageExtractor.ExtractPingMessage(message);
         Debug.Log(pong.Payload.Message);
     }
+
     public void OnLoginResponse(string message)
     {
         var loginResponse = jsonMessageExtractor.ExtractOnLoginResponseMessage(message);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnLoginResponse(loginResponse.Payload.Id));
     }
+
     public void OnSync(string message)
     {
         var syncMessage = jsonMessageExtractor.ExtractOnSyncMessage(message);
@@ -48,6 +51,7 @@ public class WebSocketSetEvents
         }
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnSync(players));
     }
+
     public void OnSpawn(string message)
     {
         var spawnResponse = jsonMessageExtractor.ExtractOnSpawnMessage(message);
@@ -56,12 +60,14 @@ public class WebSocketSetEvents
         var item = new Item(spawnResponse.Payload.Item.Id, pos);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnSpawn(item));
     }
+
     public void OnDeleteItem(string message)
     {
         var deleteMessage = jsonMessageExtractor.ExtractOnDeleteItemMessage(message);
         var deleteItem = new DeleteItem(deleteMessage.Payload.ItemId);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeleteItem(deleteItem));
     }
+
     public void OnEnvironment(string message)
     {
         var environmentMessage = jsonMessageExtractor.ExtractOnEnvironmentMessage(message);
@@ -75,6 +81,7 @@ public class WebSocketSetEvents
         var environment = new Environment(items);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnEnvironment(environment));
     }
+
     public void OnDeletePlayer(string message)
     {
         var deletePlayerMessage = jsonMessageExtractor.ExtractOnDeletePlayerMessage(message);
