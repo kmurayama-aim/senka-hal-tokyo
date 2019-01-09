@@ -13,6 +13,7 @@ public class WebSocketInitializer
     {
         setEvents = new WebSocketSetEvents();
         webSocket = new WebSocket(connectAddress);
+        var jsonMessageExtractor = new JsonMessageExtractor();
 
         // コネクションを確立したときのハンドラ
         webSocket.OnOpen += (sender, eventArgs) =>
@@ -37,7 +38,7 @@ public class WebSocketInitializer
         {
             Debug.Log("WebSocket Message: " + eventArgs.Data);
 
-            var header = JsonUtility.FromJson<RPC.Header>(eventArgs.Data);
+            var header = jsonMessageExtractor.ExtractHeaderMessage(eventArgs.Data);
             switch (header.Method)
             {
                 case "ping":

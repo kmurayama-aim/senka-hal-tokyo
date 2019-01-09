@@ -5,6 +5,12 @@ using RPC = WebSocketSample.RPC;
 
 public class JsonMessageExtractor {
 
+    public RPC.Header ExtractHeaderMessage(string jsonMessage)
+    {
+        var header = JsonUtility.FromJson<RPC.Header>(jsonMessage);
+        return header;
+    }
+
     public RPC.Ping ExtractPingMessage(string jsonMessage)
     {
         var pong = JsonUtility.FromJson<RPC.Ping>(jsonMessage);
