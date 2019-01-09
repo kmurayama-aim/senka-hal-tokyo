@@ -42,8 +42,7 @@ public class WebSocketInitializer
             {
                 case "ping":
                     {
-                        var pong = JsonUtility.FromJson<RPC.Ping>(eventArgs.Data);
-                        Debug.Log(pong.Payload.Message);
+                        setEvents.Ping(eventArgs.Data);
                         break;
                     }
                 case "login_response":
