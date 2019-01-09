@@ -6,6 +6,7 @@ using RPC = WebSocketSample.RPC;
 public class WebSocketSetEvents
 {
     MainController mainControllerSc;
+    JsonMessageExtractor jsonMessageExtractor = new JsonMessageExtractor();
 
     public WebSocketSetEvents()
     {
@@ -27,17 +28,17 @@ public class WebSocketSetEvents
 
     public void Ping(string message)
     {
-        var pong = JsonUtility.FromJson<RPC.Ping>(message);
+        var pong = jsonMessageExtractor.ExtractPingMessage(message);
         Debug.Log(pong.Payload.Message);
     }
     public void OnLoginResponse(string message)
     {
-        var loginResponse = JsonUtility.FromJson<RPC.LoginResponse>(message);
+        var loginResponse = jsonMessageExtractor.ExtractOnLoginResponseMessage(message);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnLoginResponse(loginResponse.Payload.Id));
     }
     public void OnSync(string message)
     {
-        var syncMessage = JsonUtility.FromJson<RPC.Sync>(message);
+        var syncMessage = jsonMessageExtractor.ExtractOnSyncMessage(message);
         var players = new List<Player>();
         foreach (var rpcPlayer in syncMessage.Payload.Players)
         {
@@ -49,7 +50,7 @@ public class WebSocketSetEvents
     }
     public void OnSpawn(string message)
     {
-        var spawnResponse = JsonUtility.FromJson<RPC.Spawn>(message);
+        var spawnResponse = jsonMessageExtractor.ExtractOnSpawnMessage(message);
 
         var pos = new Vector3(spawnResponse.Payload.Item.Position.X, spawnResponse.Payload.Item.Position.Y, spawnResponse.Payload.Item.Position.Z);
         var item = new Item(spawnResponse.Payload.Item.Id, pos);
@@ -57,13 +58,13 @@ public class WebSocketSetEvents
     }
     public void OnDeleteItem(string message)
     {
-        var deleteMessage = JsonUtility.FromJson<RPC.DeleteItem>(message);
+        var deleteMessage = jsonMessageExtractor.ExtractOnDeleteItemMessage(message);
         var deleteItem = new DeleteItem(deleteMessage.Payload.ItemId);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeleteItem(deleteItem));
     }
     public void OnEnvironment(string message)
     {
-        var environmentMessage = JsonUtility.FromJson<RPC.Environment>(message);
+        var environmentMessage = jsonMessageExtractor.ExtractOnEnvironmentMessage(message);
         var items = new List<Item>();
         foreach (var rpcItem in environmentMessage.Payload.Items)
         {
@@ -76,7 +77,7 @@ public class WebSocketSetEvents
     }
     public void OnDeletePlayer(string message)
     {
-        var deletePlayerMessage = JsonUtility.FromJson<RPC.DeletePlayer>(message);
+        var deletePlayerMessage = jsonMessageExtractor.ExtractOnDeletePlayerMessage(message);
         MainThreadExecutor.Enqueue(() => mainControllerSc.OnDeletePlayer(deletePlayerMessage.Payload.Id));
     }
 }
