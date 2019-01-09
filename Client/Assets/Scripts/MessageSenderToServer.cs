@@ -2,19 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MessageSenderToServer : MonoBehaviour
+public class MessageSenderToServer
 {
-    WebSocketInitializer socketInitializer;
-    JsonMessageCreater jsonMessageCreater;
+    WebSocketInitializer socketInitializer = new WebSocketInitializer();
+    JsonMessageCreater jsonMessageCreater = new JsonMessageCreater();
 
-    void Awake()
+    public void SendLoginMessage(string connectAddress, string playerName)
     {
-        socketInitializer = GetComponent<WebSocketInitializer>();
-        jsonMessageCreater = new JsonMessageCreater();
-    }
+        socketInitializer.Initialize(connectAddress);
 
-    public void SendLoginMessage(string playerName)
-    {
         var jsonMessage = jsonMessageCreater.CreateLoginMessage(playerName);
         Debug.Log(jsonMessage);
 

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using RPC = WebSocketSample.RPC;
 
-public class WebSocketSetEvents : MonoBehaviour
+public class WebSocketSetEvents
 {
     MainController mainControllerSc;
-    void Awake()
+
+    public WebSocketSetEvents()
     {
-        mainControllerSc = GameObject.Find("Main").GetComponent<MainController>();
+        MainThreadExecutor.Enqueue(() => mainControllerSc = GameObject.Find("Main").GetComponent<MainController>());
     }
 
     public void OnOpen()

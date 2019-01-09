@@ -18,8 +18,10 @@ public class MainController : MonoBehaviour
     Dictionary<int, GameObject> otherPlayerObjs = new Dictionary<int, GameObject>();
     Dictionary<int, GameObject> items = new Dictionary<int, GameObject>();
 
+    MessageSenderToServer messageSenderToServer = new MessageSenderToServer();
+
     [SerializeField]
-    MessageSenderToServer messageSenderToServer; //WebSocketInitializerがStartでイベントを登録する前に参照が無いとエラー
+    string connectAddress;
 
     void Start()
     {
@@ -33,9 +35,7 @@ public class MainController : MonoBehaviour
 
     public void Login()
     {
-        WebSocketInitializer socketInitializer = GetComponent<WebSocketInitializer>();
-        socketInitializer.Initialize();
-        messageSenderToServer.SendLoginMessage("PlayerName");
+        messageSenderToServer.SendLoginMessage(connectAddress, "PlayerName");
     }
 
     public void OnLoginResponse(int playerId)
@@ -185,5 +185,9 @@ public class MainController : MonoBehaviour
         messageSenderToServer.SendLogoutMessage();
         MainThreadExecutor.Clear();
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+    void OnDestroy()
+    {
+        messageSenderToServer.SendLogoutMessage();
     }
 }

@@ -4,16 +4,14 @@ using UnityEngine;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
 
-public class WebSocketInitializer : MonoBehaviour
+public class WebSocketInitializer
 {
     WebSocket webSocket;    // WebSocketコネクション
-    [SerializeField]
-    string connectAddress;
-    [SerializeField]
     WebSocketSetEvents setEvents;
 
-    public void Initialize()
+    public void Initialize(string connectAddress)
     {
+        setEvents = new WebSocketSetEvents();
         webSocket = new WebSocket(connectAddress);
 
         // コネクションを確立したときのハンドラ
@@ -82,10 +80,6 @@ public class WebSocketInitializer : MonoBehaviour
         };
 
         webSocket.Connect();
-    }
-    void OnDestroy()
-    {
-        Close();
     }
     public void Send(string message)
     {
