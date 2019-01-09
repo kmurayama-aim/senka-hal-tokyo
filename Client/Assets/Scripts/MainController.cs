@@ -67,7 +67,7 @@ public class MainController : MonoBehaviour
         messageSenderToServer.SendUpdatePositionMessage(currentPlayerPosition, playerId);
     }
 
-    public void OnSync(List<Player> players)
+    public void OnSync(IEnumerable<Player> players)
     {
         Debug.Log("<< Sync");
         foreach (var player in players)
