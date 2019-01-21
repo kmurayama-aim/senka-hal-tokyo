@@ -18,15 +18,17 @@ namespace WebSocketSample.Server
             model.sendTo += SendTo;
             model.broadcast += Broadcast;
             WebSocketServer = new WebSocketServer(address);
-            WebSocketServer.AddWebSocketService<GameService>(SERVICE_NAME, () =>
+
+            var service = new GameService();
+            service.OnPing += model.OnPing;
+            service.OnLogin += model.OnLogin;
+            service.OnPlayerUpdate += model.OnPlayerUpdate;
+            service.OnGetItem += model.OnGetItem;
+            service.OnCollision += model.OnCollision;
+
+            WebSocketServer.AddWebSocketService<SocketService>(SERVICE_NAME, () =>
             {
-                var service = new GameService();
-                service.OnPing += model.OnPing;
-                service.OnLogin += model.OnLogin;
-                service.OnPlayerUpdate += model.OnPlayerUpdate;
-                service.OnGetItem += model.OnGetItem;
-                service.OnCollision += model.OnCollision;
-                return service;
+                return new SocketService(service);
             });
         }
 
