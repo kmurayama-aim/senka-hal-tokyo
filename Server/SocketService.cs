@@ -8,27 +8,31 @@ namespace WebSocketSample.Server
 {
     class SocketService : WebSocketBehavior
     {
-        GameService sendMessageTarget;
+        IMessageReceiver messageReceiver;
 
-        public SocketService(GameService sendMessageTarget)
+        public SocketService(IMessageReceiver messageReceiver)
         {
-            this.sendMessageTarget = sendMessageTarget;
+            this.messageReceiver = messageReceiver;
         }
 
         protected override void OnOpen()
         {
+            messageReceiver.OnOpen();
         }
 
         protected override void OnClose(CloseEventArgs e)
         {
+            messageReceiver.OnClose();
         }
 
         protected override void OnMessage(MessageEventArgs e)
         {
+            messageReceiver.OnMessage();
         }
 
         protected override void OnError(ErrorEventArgs e)
         {
+            messageReceiver.OnError();
         }
     }
 }
