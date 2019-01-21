@@ -9,7 +9,7 @@ namespace WebSocketSample.Server
     {
         void OnOpen();
         void OnClose();
-        void OnMessage();
-        void OnError();
+        void OnMessage(RemoteMessage remoteMessage);
+        void OnError(RemoteError remoteError);
     }
 }

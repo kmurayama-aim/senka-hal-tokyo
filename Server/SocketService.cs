@@ -27,12 +27,16 @@ namespace WebSocketSample.Server
 
         protected override void OnMessage(MessageEventArgs e)
         {
-            messageReceiver.OnMessage();
+            var header = JsonConvert.DeserializeObject<Header>(e.Data).Method;
+            //本当はe.Dataをデシリアライズして送りたい
+            var remoteMessage = new RemoteMessage(ID, header, e.Data);
+            messageReceiver.OnMessage(remoteMessage);
         }
 
         protected override void OnError(ErrorEventArgs e)
         {
-            messageReceiver.OnError();
+            var remoteError = new RemoteError(e.Exception, e.Message);
+            messageReceiver.OnError(remoteError);
         }
     }
 }
