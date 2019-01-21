@@ -3,7 +3,7 @@ using WebSocketSharp.Server;
 
 namespace WebSocketSample.Server
 {
-    public class GameServer
+    class GameServer
     {
         const string SERVICE_NAME = "/";
         const ConsoleKey EXIT_KEY = ConsoleKey.Q;

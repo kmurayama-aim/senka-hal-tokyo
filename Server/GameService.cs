@@ -6,7 +6,7 @@ using WebSocketSample.RPC;
 
 namespace WebSocketSample.Server
 {
-    public class GameService : WebSocketBehavior
+    class GameService : WebSocketBehavior
     {
         public event Action<string> OnPing;
         public event Action<string, LoginPayload> OnLogin;

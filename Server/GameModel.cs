@@ -6,7 +6,7 @@ using WebSocketSample.RPC;
 
 namespace WebSocketSample.Server
 {
-    public class GameModel
+    class GameModel
     {
         Dictionary<int, Player> players = new Dictionary<int, Player>();
         Dictionary<int, Item> items = new Dictionary<int, Item>();
