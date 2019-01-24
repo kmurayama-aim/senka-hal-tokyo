@@ -52,6 +52,13 @@
     <Compile Include="MainClass.cs" />
     <Compile Include="GameModel.cs" />
     <Compile Include="Item.cs" />
+    <Compile Include="SendingDeleteItemData.cs" />
+    <Compile Include="SendingDeletePlayerData.cs" />
+    <Compile Include="SendingEnvironmentData.cs" />
+    <Compile Include="SendingLoginResponseData.cs" />
+    <Compile Include="SendingPongData.cs" />
+    <Compile Include="SendingSpawnData.cs" />
+    <Compile Include="SendingSyncData.cs" />
     <Compile Include="SocketService.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
