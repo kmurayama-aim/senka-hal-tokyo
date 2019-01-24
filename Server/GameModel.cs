@@ -37,11 +37,11 @@ namespace WebSocketSample.Server
             Console.WriteLine("<< Pong");
         }
 
-        public void OnLogin(string senderId, LoginPayload loginPayload)
+        public void OnLogin(string senderId, ReceivedLoginData loginMessage)
         {
             Console.WriteLine(">> Login");
 
-            var player = new Player(uidCounter++, loginPayload.Name, new Position(0f, 0f, 0f), 0);
+            var player = new Player(uidCounter++, loginMessage.Name, new PositionData(0f, 0f, 0f), 0);
             lock (players)
             {
                 players[player.Uid] = player;
@@ -56,18 +56,18 @@ namespace WebSocketSample.Server
             Environment(senderId);
         }
 
-        public void OnPlayerUpdate(string senderId, PlayerUpdatePayload playerUpdatePayload)
+        public void OnPlayerUpdate(string senderId, ReceivedPlayerUpdateData playerUpdateMessage)
         {
             Console.WriteLine(">> PlayerUpdate");
 
             Player player;
-            if (players.TryGetValue(playerUpdatePayload.Id, out player))
+            if (players.TryGetValue(playerUpdateMessage.Id, out player))
             {
-                player.SetPosition(playerUpdatePayload.Position);
+                player.SetPosition(playerUpdateMessage.Position);
             }
         }
 
-        public void OnGetItem(string senderId, GetItemPayload getItemPayload)
+        public void OnGetItem(string senderId, ReceivedGetItemData getItemPayload)
         {
             Console.WriteLine(">> GetItem");
 
@@ -87,7 +87,7 @@ namespace WebSocketSample.Server
             }
         }
 
-        public void OnCollision(string senderId, CollisionPayload payload)
+        public void OnCollision(string senderId, ReceivedCollisionData payload)
         {
             if (!players.ContainsKey(payload.AlphaId)) { return; }
             if (!players.ContainsKey(payload.BravoId)) { return; }
@@ -120,7 +120,8 @@ namespace WebSocketSample.Server
                 {
                     if (!player.isPositionChanged) continue;
 
-                    var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
+                    var pos = new RPC.Position(player.Position.X, player.Position.Y, player.Position.Z);
+                    var playerRpc = new RPC.Player(player.Uid, pos, player.Score);
                     movedPlayers.Add(playerRpc);
                     player.isPositionChanged = false;
                 }

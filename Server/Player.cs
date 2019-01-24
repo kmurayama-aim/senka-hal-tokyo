@@ -1,16 +1,15 @@
-﻿using WebSocketSample.RPC;
-
+﻿
 namespace WebSocketSample.Server
 {
     class Player
     {
         public readonly int Uid;
         public readonly string Name;
-        public Position Position;
+        public PositionData Position;
         public int Score;
         public bool isPositionChanged;
 
-        public Player(int uid, string name, Position position, int score)
+        public Player(int uid, string name, PositionData position, int score)
         {
             Uid = uid;
             Name = name;
@@ -18,7 +17,7 @@ namespace WebSocketSample.Server
             Score = score;
         }
 
-        public void SetPosition(Position position)
+        public void SetPosition(PositionData position)
         {
             if (Position.X != position.X || Position.Y != position.Y || Position.Z != position.Z)
             {
