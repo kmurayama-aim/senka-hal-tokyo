@@ -37,6 +37,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ReceivedCollisionData.cs" />
+    <Compile Include="ReceivedGetItemData.cs" />
+    <Compile Include="ReceivedLoginData.cs" />
+    <Compile Include="ReceivedPlayerUpdateData.cs" />
+    <Compile Include="PositionData.cs" />
     <Compile Include="RemoteError.cs" />
     <Compile Include="IMessageReceiver.cs" />
     <Compile Include="RemoteMessage.cs" />
