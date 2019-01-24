@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingPongData
     {
+        public string PongMessage { get; }
+
+        public SendingPongData(string pongMessage)
+        {
+            this.PongMessage = pongMessage;
+        }
     }
 }

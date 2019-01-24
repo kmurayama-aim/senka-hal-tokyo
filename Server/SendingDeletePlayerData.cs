@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingDeletePlayerData
     {
+        public int DeletingPlayerUid { get; }
+
+        public SendingDeletePlayerData(int deletingPlayerUid)
+        {
+            this.DeletingPlayerUid = deletingPlayerUid;
+        }
     }
 }

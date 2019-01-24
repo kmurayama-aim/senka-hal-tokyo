@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingSyncData
     {
+        public IEnumerable<Player> MovedPlayers { get; }
+
+        public SendingSyncData(IEnumerable<Player> movedPlayers)
+        {
+            this.MovedPlayers = movedPlayers;
+        }
     }
 }

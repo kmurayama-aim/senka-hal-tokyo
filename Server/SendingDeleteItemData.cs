@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingDeleteItemData
     {
+        public int DeletingItemId { get; }
+
+        public SendingDeleteItemData(int deletingItemId)
+        {
+            this.DeletingItemId = deletingItemId;
+        }
     }
 }

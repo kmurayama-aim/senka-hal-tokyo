@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingSpawnData
     {
+        public Item SpawnedItem { get; }
+
+        public SendingSpawnData(Item spawnedItem)
+        {
+            this.SpawnedItem = spawnedItem;
+        }
     }
 }

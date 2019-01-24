@@ -7,5 +7,11 @@ namespace WebSocketSample.Server
 {
     class SendingEnvironmentData
     {
+        public IEnumerable<Item> AllItems { get; }
+
+        public SendingEnvironmentData(IEnumerable<Item> allItems)
+        {
+            this.AllItems = allItems;
+        }
     }
 }
