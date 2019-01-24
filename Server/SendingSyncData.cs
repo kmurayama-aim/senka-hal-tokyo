@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingSyncData
+    class SendingSyncData : ISendingData
     {
         public IEnumerable<Player> MovedPlayers { get; }
 

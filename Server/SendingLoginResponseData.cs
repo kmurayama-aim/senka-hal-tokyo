@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingLoginResponseData
+    class SendingLoginResponseData : ISendingData
     {
         public int LoginPlayerUid { get; }
 

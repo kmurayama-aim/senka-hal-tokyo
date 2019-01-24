@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingPongData
+    class SendingPongData : ISendingData
     {
         public string PongMessage { get; }
 

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingSpawnData
+    class SendingSpawnData : ISendingData
     {
         public Item SpawnedItem { get; }
 

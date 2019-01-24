@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingEnvironmentData
+    class SendingEnvironmentData : ISendingData
     {
         public IEnumerable<Item> AllItems { get; }
 

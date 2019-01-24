@@ -5,7 +5,7 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    class SendingDeleteItemData
+    class SendingDeleteItemData : ISendingData
     {
         public int DeletingItemId { get; }
 

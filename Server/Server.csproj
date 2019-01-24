@@ -37,6 +37,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ISendingData.cs" />
     <Compile Include="ReceivedCollisionData.cs" />
     <Compile Include="ReceivedGetItemData.cs" />
     <Compile Include="ReceivedLoginData.cs" />
