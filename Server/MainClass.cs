@@ -31,9 +31,9 @@ namespace WebSocketSample.Server
 
         static void Initialize(string address)
         {
-            var gameModel = new GameModel();
-            var gameService = new GameService();
             var webSocketServer = new WebSocketServer(address);
+            var gameModel = new GameModel();
+            var gameService = new GameService(webSocketServer);
             var gameServer = new GameServer(gameModel, gameService, webSocketServer);
 
             gameServer.RunForever();
