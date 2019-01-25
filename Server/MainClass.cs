@@ -33,7 +33,7 @@ namespace WebSocketSample.Server
         {
             var webSocketServer = new WebSocketServer(address);
             var gameModel = new GameModel();
-            var gameService = new GameService(webSocketServer);
+            var gameService = new GameService();
             var gameServer = new GameServer(gameModel, gameService, webSocketServer);
 
             gameServer.RunForever();

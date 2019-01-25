@@ -33,7 +33,7 @@ namespace WebSocketSample.Server
 
             webSocketServer.AddWebSocketService<SocketService>(service.ServiceName, () =>
             {
-                return new SocketService(service);
+                return new SocketService(service, webSocketServer, service.ServiceName);
             });
         }
 
