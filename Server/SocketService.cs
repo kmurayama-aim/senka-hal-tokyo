@@ -8,21 +8,21 @@ namespace WebSocketSample.Server
 {
     class SocketService : WebSocketBehavior
     {
-        IMessageReceiver messageReceiver;
+        IMessenger messenger;
 
-        public SocketService(IMessageReceiver messageReceiver)
+        public SocketService(IMessenger messenger)
         {
-            this.messageReceiver = messageReceiver;
+            this.messenger = messenger;
         }
 
         protected override void OnOpen()
         {
-            messageReceiver.OnOpen();
+            messenger.OnOpen();
         }
 
         protected override void OnClose(CloseEventArgs e)
         {
-            messageReceiver.OnClose();
+            messenger.OnClose();
         }
 
         protected override void OnMessage(MessageEventArgs e)
@@ -30,13 +30,13 @@ namespace WebSocketSample.Server
             var header = JsonConvert.DeserializeObject<Header>(e.Data).Method;
             //本当はe.Dataをデシリアライズして送りたい
             var remoteMessage = new RemoteMessage(ID, header, e.Data);
-            messageReceiver.OnMessage(remoteMessage);
+            messenger.OnMessage(remoteMessage);
         }
 
         protected override void OnError(ErrorEventArgs e)
         {
             var remoteError = new RemoteError(e.Exception, e.Message);
-            messageReceiver.OnError(remoteError);
+            messenger.OnError(remoteError);
         }
     }
 }

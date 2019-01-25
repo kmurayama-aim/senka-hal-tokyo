@@ -5,8 +5,11 @@ using System.Text;
 
 namespace WebSocketSample.Server
 {
-    interface IMessageReceiver
+    interface IMessenger
     {
+        event Action<ISendingData, string> OnSendTo;
+        event Action<ISendingData> OnBroadCast;
+
         void OnOpen();
         void OnClose();
         void OnMessage(RemoteMessage remoteMessage);

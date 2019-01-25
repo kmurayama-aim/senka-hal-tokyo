@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace WebSocketSample.Server
 {
-    class GameService : IMessageReceiver
+    class GameService : IMessenger
     {
         const string SERVICE_NAME = "/";
         public string ServiceName { get { return SERVICE_NAME; } }
@@ -19,6 +19,9 @@ namespace WebSocketSample.Server
         public event Action<string, ReceivedPlayerUpdateData> OnPlayerUpdate;
         public event Action<string, ReceivedGetItemData> OnGetItem;
         public event Action<string, ReceivedCollisionData> OnCollision;
+
+        public event Action<ISendingData, string> OnSendTo;
+        public event Action<ISendingData> OnBroadCast;
 
         public GameService(WebSocketServer webSocketServer)
         {
