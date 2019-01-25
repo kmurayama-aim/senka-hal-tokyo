@@ -26,7 +26,16 @@ namespace WebSocketSample.Server
             var address = string.Format("ws://{0}:{1}", ipv4.ToString(), port);
             Console.WriteLine(address);
 
-            var gameServer = new GameServer(address);
+            Initialize(address);
+        }
+
+        static void Initialize(string address)
+        {
+            var gameModel = new GameModel();
+            var gameService = new GameService();
+            var webSocketServer = new WebSocketServer(address);
+            var gameServer = new GameServer(gameModel, gameService, webSocketServer);
+
             gameServer.RunForever();
         }
     }

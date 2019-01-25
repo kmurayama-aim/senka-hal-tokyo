@@ -10,27 +10,31 @@ namespace WebSocketSample.Server
     class GameServer
     {
         const string SERVICE_NAME = "/";
+        public string ServiceName { get { return SERVICE_NAME; } }
+        
         const ConsoleKey EXIT_KEY = ConsoleKey.Q;
 
         GameModel model;
+        GameService service;
 
-        WebSocketServer WebSocketServer;
+        WebSocketServer webSocketServer;
 
-        public GameServer(string address)
+        public GameServer(GameModel model, GameService service, WebSocketServer webSocketServer)
         {
-            model = new GameModel();
+            this.service = service;
+            this.model = model;
+            this.webSocketServer = webSocketServer;
+
             model.sendTo += SendTo;
             model.broadcast += Broadcast;
-            WebSocketServer = new WebSocketServer(address);
 
-            var service = new GameService();
             service.OnPing += model.OnPing;
             service.OnLogin += model.OnLogin;
             service.OnPlayerUpdate += model.OnPlayerUpdate;
             service.OnGetItem += model.OnGetItem;
             service.OnCollision += model.OnCollision;
 
-            WebSocketServer.AddWebSocketService<SocketService>(SERVICE_NAME, () =>
+            webSocketServer.AddWebSocketService<SocketService>(SERVICE_NAME, () =>
             {
                 return new SocketService(service);
             });
@@ -38,7 +42,7 @@ namespace WebSocketSample.Server
 
         public void RunForever()
         {
-            WebSocketServer.Start();
+            webSocketServer.Start();
             Console.WriteLine("Game Server started.");
 
             while (!IsInputtedExitKey())
@@ -58,7 +62,7 @@ namespace WebSocketSample.Server
                     return false;
 
                 case EXIT_KEY:
-                    WebSocketServer.Stop();
+                    webSocketServer.Stop();
                     Console.WriteLine("Game Server terminated.");
                     return true;
             }
@@ -68,7 +72,7 @@ namespace WebSocketSample.Server
         {
             var message = FormatWebSocketMessage(data);
 
-            WebSocketServer.WebSocketServices[SERVICE_NAME].Sessions.SendTo(message, id);
+            webSocketServer.WebSocketServices[SERVICE_NAME].Sessions.SendTo(message, id);
             Console.WriteLine("<< SendTo: " + id + " " + message);
         }
 
@@ -76,7 +80,7 @@ namespace WebSocketSample.Server
         {
             var message = FormatWebSocketMessage(data);
 
-            WebSocketServer.WebSocketServices[SERVICE_NAME].Sessions.Broadcast(message);
+            webSocketServer.WebSocketServices[SERVICE_NAME].Sessions.Broadcast(message);
             Console.WriteLine("<< Broeadcast: " + message);
         }
 
@@ -110,24 +114,24 @@ namespace WebSocketSample.Server
                         jsonMessage = JsonConvert.SerializeObject(deletePlayerRpc);
                         break;
                     }
-                case SendingSyncData sync:
+                case SendingSyncData syncData:
                     {
-                        var rpcPlayers = CreateRpcPlayers(sync.MovedPlayers);
+                        var rpcPlayers = CreateRpcPlayers(syncData.MovedPlayers);
                         var syncRpc = new Sync(new SyncPayload(rpcPlayers));
                         jsonMessage = JsonConvert.SerializeObject(syncRpc);
                         break;
                     }
-                case SendingSpawnData spawn:
+                case SendingSpawnData spawnData:
                     {
-                        var rpcItemPos = CreateRpcPosition(spawn.SpawnedItem.Position);
-                        var rpcItem = new RPC.Item(spawn.SpawnedItem.Id, rpcItemPos);
+                        var rpcItemPos = CreateRpcPosition(spawnData.SpawnedItem.Position);
+                        var rpcItem = new RPC.Item(spawnData.SpawnedItem.Id, rpcItemPos);
                         var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
                         jsonMessage = JsonConvert.SerializeObject(spawnRpc);
                         break;
                     }
-                case SendingEnvironmentData environment:
+                case SendingEnvironmentData environmentData:
                     {
-                        var rpcItems = CreateRpcItems(environment.AllItems);
+                        var rpcItems = CreateRpcItems(environmentData.AllItems);
                         var environmentRpc = new RPC.Environment(new EnvironmentPayload(rpcItems));
                         jsonMessage = JsonConvert.SerializeObject(environmentRpc);
                         break;
