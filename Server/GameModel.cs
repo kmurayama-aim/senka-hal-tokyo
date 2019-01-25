@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Timers;
-using Newtonsoft.Json;
-using WebSocketSample.RPC;
 
 namespace WebSocketSample.Server
 {
@@ -13,8 +11,8 @@ namespace WebSocketSample.Server
 
         int uidCounter;
 
-        public event Action<string, string> sendTo;
-        public event Action<string> broadcast;
+        public event Action<ISendingData, string> sendTo;
+        public event Action<ISendingData> broadcast;
 
         public GameModel()
         {
@@ -30,9 +28,8 @@ namespace WebSocketSample.Server
         {
             Console.WriteLine(">> Ping");
 
-            var pingRpc = new Ping(new PingPayload("pong"));
-            var pingJson = JsonConvert.SerializeObject(pingRpc);
-            sendTo(pingJson, senderId);
+            var pongData = new SendingPongData("pong");
+            sendTo(pongData, senderId);
 
             Console.WriteLine("<< Pong");
         }
@@ -47,9 +44,8 @@ namespace WebSocketSample.Server
                 players[player.Uid] = player;
             }
 
-            var loginResponseRpc = new LoginResponse(new LoginResponsePayload(player.Uid));
-            var loginResponseJson = JsonConvert.SerializeObject(loginResponseRpc);
-            sendTo(loginResponseJson, senderId);
+            var loginResponseData = new SendingLoginResponseData(player.Uid);
+            sendTo(loginResponseData, senderId);
 
             Console.WriteLine(player.ToString() + " login.");
 
@@ -77,9 +73,8 @@ namespace WebSocketSample.Server
                 items.Remove(itemId);
                 players[getItemPayload.PlayerId].Score++;
 
-                var deleteItemRpc = new DeleteItem(new DeleteItemPayload(itemId));
-                var deleteItemJson = JsonConvert.SerializeObject(deleteItemRpc);
-                broadcast(deleteItemJson);
+                var deleteItemData = new SendingDeleteItemData(itemId);
+                broadcast(deleteItemData);
             }
             else
             {
@@ -104,34 +99,30 @@ namespace WebSocketSample.Server
                 players.Remove(loser.Uid);
             }
 
-            var deletePlayerRpc = new DeletePlayer(new DeletePlayerPayload(loser.Uid));
-            var deletePlayerJson = JsonConvert.SerializeObject(deletePlayerRpc);
-            broadcast(deletePlayerJson);
+            var deletePlayerData = new SendingDeletePlayerData(loser.Uid);
+            broadcast(deletePlayerData);
         }
 
         void Sync()
         {
             if (players.Count == 0) return;
 
-            var movedPlayers = new List<RPC.Player>();
+            var movedPlayers = new List<Player>();
             lock (players)
             {
                 foreach (var player in players.Values)
                 {
                     if (!player.isPositionChanged) continue;
 
-                    var pos = new RPC.Position(player.Position.X, player.Position.Y, player.Position.Z);
-                    var playerRpc = new RPC.Player(player.Uid, pos, player.Score);
-                    movedPlayers.Add(playerRpc);
+                    movedPlayers.Add(player);
                     player.isPositionChanged = false;
                 }
             }
 
             if (movedPlayers.Count == 0) return;
 
-            var syncRpc = new Sync(new SyncPayload(movedPlayers));
-            var syncJson = JsonConvert.SerializeObject(syncRpc);
-            broadcast(syncJson);
+            var syncData = new SendingSyncData(movedPlayers);
+            broadcast(syncData);
         }
 
         void StartSpawnTimer()
@@ -144,14 +135,12 @@ namespace WebSocketSample.Server
 
                 var randomX = random.Next(-5, 5);
                 var randomZ = random.Next(-5, 5);
-                var position = new Position(randomX, 0.5f, randomZ);
+                var position = new PositionData(randomX, 0.5f, randomZ);
                 var item = new Item(uidCounter++, position);
                 items.Add(item.Id, item);
 
-                var rpcItem = new RPC.Item(item.Id, item.Position);
-                var spawnRpc = new Spawn(new SpawnPayload(rpcItem));
-                var spawnJson = JsonConvert.SerializeObject(spawnRpc);
-                broadcast(spawnJson);
+                var spawnData = new SendingSpawnData(item);
+                broadcast(spawnData);
 
                 Console.WriteLine("<< Spawn");
             };
@@ -160,16 +149,8 @@ namespace WebSocketSample.Server
 
         void Environment(string id)
         {
-            var itemsRpc = new List<RPC.Item>();
-            foreach (var item in items.Values)
-            {
-                var itemRpc = new RPC.Item(item.Id, item.Position);
-                itemsRpc.Add(itemRpc);
-            }
-
-            var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
-            var environmentJson = JsonConvert.SerializeObject(environmentRpc);
-            sendTo(environmentJson, id);
+            var environmentData = new SendingEnvironmentData(items.Values);
+            sendTo(environmentData, id);
         }
     }
 }
