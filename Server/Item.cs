@@ -1,13 +1,12 @@
-﻿using WebSocketSample.RPC;
-
+﻿
 namespace WebSocketSample.Server
 {
-    public class Item
+    class Item
     {
         public int Id;
-        public Position Position;
+        public PositionData Position;
 
-        public Item(int id, Position position)
+        public Item(int id, PositionData position)
         {
             Id = id;
             Position = position;
