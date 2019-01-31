@@ -1,38 +1,45 @@
 ﻿using System;
 using WebSocketSharp.Server;
+using WebSocketSample.RPC;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace WebSocketSample.Server
 {
-    public class GameServer
-    {
-        const string SERVICE_NAME = "/";
+    class GameServer
+    {        
         const ConsoleKey EXIT_KEY = ConsoleKey.Q;
 
         GameModel model;
+        GameService service;
 
-        WebSocketServer WebSocketServer;
+        WebSocketServer webSocketServer;
 
-        public GameServer(string address)
+        public GameServer(GameModel model, GameService service, WebSocketServer webSocketServer)
         {
-            model = new GameModel();
-            model.sendTo += SendTo;
-            model.broadcast += Broadcast;
-            WebSocketServer = new WebSocketServer(address);
-            WebSocketServer.AddWebSocketService<GameService>(SERVICE_NAME, () =>
+            this.service = service;
+            this.model = model;
+            this.webSocketServer = webSocketServer;
+
+            model.sendTo += service.SendTo;
+            model.broadcast += service.Broadcast;
+
+            service.OnPing += model.OnPing;
+            service.OnLogin += model.OnLogin;
+            service.OnPlayerUpdate += model.OnPlayerUpdate;
+            service.OnGetItem += model.OnGetItem;
+            service.OnCollision += model.OnCollision;
+
+            webSocketServer.AddWebSocketService<SocketService>(service.ServiceName, () =>
             {
-                var service = new GameService();
-                service.OnPing += model.OnPing;
-                service.OnLogin += model.OnLogin;
-                service.OnPlayerUpdate += model.OnPlayerUpdate;
-                service.OnGetItem += model.OnGetItem;
-                service.OnCollision += model.OnCollision;
-                return service;
+                return new SocketService(service, webSocketServer, service.ServiceName);
             });
         }
 
         public void RunForever()
         {
-            WebSocketServer.Start();
+            webSocketServer.Start();
             Console.WriteLine("Game Server started.");
 
             while (!IsInputtedExitKey())
@@ -52,22 +59,10 @@ namespace WebSocketSample.Server
                     return false;
 
                 case EXIT_KEY:
-                    WebSocketServer.Stop();
+                    webSocketServer.Stop();
                     Console.WriteLine("Game Server terminated.");
                     return true;
             }
-        }
-
-        void SendTo(string message, string id)
-        {
-            WebSocketServer.WebSocketServices[SERVICE_NAME].Sessions.SendTo(message, id);
-            Console.WriteLine("<< SendTo: " + id + " " + message);
-        }
-
-        void Broadcast(string message)
-        {
-            WebSocketServer.WebSocketServices[SERVICE_NAME].Sessions.Broadcast(message);
-            Console.WriteLine("<< Broeadcast: " + message);
         }
     }
 }

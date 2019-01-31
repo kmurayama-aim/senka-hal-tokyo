@@ -1,73 +1,89 @@
 ﻿using System;
 using Newtonsoft.Json;
-using WebSocketSharp;
-using WebSocketSharp.Server;
 using WebSocketSample.RPC;
 
 namespace WebSocketSample.Server
 {
-    public class GameService : WebSocketBehavior
+    class GameService : IMessenger
     {
-        public event Action<string> OnPing;
-        public event Action<string, LoginPayload> OnLogin;
-        public event Action<string, PlayerUpdatePayload> OnPlayerUpdate;
-        public event Action<string, GetItemPayload> OnGetItem;
-        public event Action<string, CollisionPayload> OnCollision;
+        const string SERVICE_NAME = "/";
+        public string ServiceName { get { return SERVICE_NAME; } }
 
-        protected override void OnOpen()
+        public event Action<string> OnPing;
+        public event Action<string, ReceivedLoginData> OnLogin;
+        public event Action<string, ReceivedPlayerUpdateData> OnPlayerUpdate;
+        public event Action<string, ReceivedGetItemData> OnGetItem;
+        public event Action<string, ReceivedCollisionData> OnCollision;
+
+        public event Action<ISendingData, string> OnSendTo;
+        public event Action<ISendingData> OnBroadCast;
+
+        public void OnOpen()
         {
             Console.WriteLine("WebSocket opened.");
         }
 
-        protected override void OnClose(CloseEventArgs e)
+        public void OnClose()
         {
             Console.WriteLine("WebSocket Close.");
         }
 
-        protected override void OnMessage(MessageEventArgs e)
+        public void OnMessage(RemoteMessage e)
         {
-            Console.WriteLine("WebSocket Message: " + e.Data);
+            Console.WriteLine("WebSocket Message: " + e.Message);
 
-            var header = JsonConvert.DeserializeObject<Header>(e.Data);
-            Console.WriteLine("Header: " + header.Method);
-
-            switch (header.Method)
+            switch (e.Header)
             {
                 case "ping":
                     {
-                        OnPing(ID);
+                        OnPing(e.SenderID);
                         break;
                     }
                 case "login":
                     {
-                        var loginPayload = JsonConvert.DeserializeObject<Login>(e.Data).Payload;
-                        OnLogin(ID, loginPayload);
+                        var loginPayload = JsonConvert.DeserializeObject<Login>(e.Message).Payload;
+                        var loginMessage = new ReceivedLoginData(loginPayload.Name);
+                        OnLogin(e.SenderID, loginMessage);
                         break;
                     }
                 case "player_update":
                     {
-                        var playerUpdatePayload = JsonConvert.DeserializeObject<PlayerUpdate>(e.Data).Payload;
-                        OnPlayerUpdate(ID, playerUpdatePayload);
+                        var playerUpdatePayload = JsonConvert.DeserializeObject<PlayerUpdate>(e.Message).Payload;
+                        var rpcPos = playerUpdatePayload.Position;
+                        var playerUpdateMessage = new ReceivedPlayerUpdateData(playerUpdatePayload.Id, new PositionData(rpcPos.X, rpcPos.Y, rpcPos.Z));
+                        OnPlayerUpdate(e.SenderID, playerUpdateMessage);
                         break;
                     }
                 case "get_item":
                     {
-                        var getItemPayload = JsonConvert.DeserializeObject<GetItem>(e.Data).Payload;
-                        OnGetItem(ID, getItemPayload);
+                        var getItemPayload = JsonConvert.DeserializeObject<GetItem>(e.Message).Payload;
+                        var getItemMessage = new ReceivedGetItemData(getItemPayload.ItemId, getItemPayload.PlayerId);
+                        OnGetItem(e.SenderID, getItemMessage);
                         break;
                     }
                 case "collision":
                     {
-                        var collisionPayload = JsonConvert.DeserializeObject<RPC.Collision>(e.Data).Payload;
-                        OnCollision(ID, collisionPayload);
+                        var collisionPayload = JsonConvert.DeserializeObject<RPC.Collision>(e.Message).Payload;
+                        var collisionMessage = new ReceivedCollisionData(collisionPayload.AlphaId, collisionPayload.BravoId);
+                        OnCollision(e.SenderID, collisionMessage);
                         break;
                     }
             }
         }
 
-        protected override void OnError(ErrorEventArgs e)
+        public void OnError(RemoteError e)
         {
             Console.WriteLine("WebSocket Error: " + e);
+        }
+
+        public void SendTo(ISendingData data, string id)
+        {
+            OnSendTo(data, id);
+        }
+
+        public void Broadcast(ISendingData data)
+        {
+            OnBroadCast(data);
         }
     }
 }
