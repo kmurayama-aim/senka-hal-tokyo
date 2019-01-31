@@ -5,6 +5,7 @@ using WebSocketSharp;
 using WebSocketSharp.Server;
 using Newtonsoft.Json;
 using WebSocketSample.RPC;
+using System.Linq;
 
 namespace WebSocketSample.Server
 {
@@ -12,15 +13,9 @@ namespace WebSocketSample.Server
     {
         static void Main()
         {
-            IPAddress ipv4 = null;
-            foreach (var ipAddress in Dns.GetHostAddresses(""))
-            {
-                if (ipAddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
-                {
-                    ipv4 = ipAddress;
-                    break;
-                }
-            }
+            var ipv4 = Dns.GetHostAddresses("").FirstOrDefault(ipAdddress => ipAdddress.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork);
+            if (ipv4 == null)
+                return;
 
             var port = 5678;
             var address = string.Format("ws://{0}:{1}", ipv4.ToString(), port);

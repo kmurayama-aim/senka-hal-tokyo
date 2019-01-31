@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using WebSocketSharp;
 using RPC = WebSocketSample.RPC;
+using System.Linq;
 
 public class MainController : MonoBehaviour
 {
@@ -229,6 +230,13 @@ public class MainController : MonoBehaviour
             };
         }
     }
+    void SpawnItem(IEnumerable<RPC.Item> rpcItems)
+    {
+        foreach (var rpcItem in rpcItems)
+        {
+            SpawnItem(rpcItem);
+        }
+    }
     GameObject GetSpawnItem(RPC.ItemType type)
     {
         var spawnObj = itemPrefab;
@@ -259,14 +267,7 @@ public class MainController : MonoBehaviour
     {
         Debug.Log("<< Environment");
 
-        var serverUnknownItems = new List<KeyValuePair<int, GameObject>>();
-        // サーバーからのリスト(payload.Items)にないアイテムを所持していたらserverUnknownItemsに追加
-        foreach (var item in items)
-        {
-            if (payload.Items.Exists(itemRpc => itemRpc.Id == item.Key)) continue;
-
-            serverUnknownItems.Add(item);
-        }
+        var serverUnknownItems = items.Where(item => payload.Items.Exists(itemRpc => itemRpc.Id == item.Key));
         // serverUnknownItemsをクライアントから削除
         foreach (var item in serverUnknownItems)
         {
@@ -274,12 +275,8 @@ public class MainController : MonoBehaviour
             Destroy(item.Value);
         }
 
-        foreach (var rpcItem in payload.Items)
-        {
-            if (items.ContainsKey(rpcItem.Id)) continue;
-
-            SpawnItem(rpcItem);
-        }
+        var spawnItems = payload.Items.Where(rpcItem => !items.ContainsKey(rpcItem.Id));
+        SpawnItem(spawnItems);
     }
 
     void OnDeletePlayer(RPC.DeletePlayerPayload payload)

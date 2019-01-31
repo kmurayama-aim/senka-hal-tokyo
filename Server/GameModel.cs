@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Timers;
 using Newtonsoft.Json;
 using WebSocketSample.RPC;
+using System.Linq;
 
 namespace WebSocketSample.Server
 {
@@ -134,26 +135,38 @@ namespace WebSocketSample.Server
             broadcast(deletePlayerJson);
         }
 
+        RPC.Player GetRpcPlayer(Player player)
+        {
+            var rpcPlayer = new RPC.Player(player.Uid, player.Position, player.Score);
+            return rpcPlayer;
+        }
+        void ClearPlayerDirtyFlag(IEnumerable<Player> players)
+        {
+            foreach (var player in players)
+            {
+                player.isPositionChanged = false;
+            }
+        }
         void Sync()
         {
-            if (players.Count == 0) return;
-
-            var movedPlayers = new List<RPC.Player>();
+            var rpcPlayers = new List<RPC.Player>();
             lock (players)
             {
-                foreach (var player in players.Values)
-                {
-                    if (!player.isPositionChanged) continue;
+                //isPositionChangedの初期化を行うため処理を分ける
+                var movedPlayers = players.Values
+                    .Where(player => player.isPositionChanged)
+                    .ToList();
 
-                    var playerRpc = new RPC.Player(player.Uid, player.Position, player.Score);
-                    movedPlayers.Add(playerRpc);
-                    player.isPositionChanged = false;
-                }
+                rpcPlayers = movedPlayers
+                    .Select(player => GetRpcPlayer(player))
+                    .ToList();
+
+                ClearPlayerDirtyFlag(movedPlayers);
             }
 
-            if (movedPlayers.Count == 0) return;
+            if (!rpcPlayers.Any()) return;
 
-            var syncRpc = new Sync(new SyncPayload(movedPlayers));
+            var syncRpc = new Sync(new SyncPayload(rpcPlayers));
             var syncJson = JsonConvert.SerializeObject(syncRpc);
             broadcast(syncJson);
         }
@@ -190,16 +203,18 @@ namespace WebSocketSample.Server
             timer.Start();
         }
 
+        RPC.Item GetRpcItem(Item item)
+        {
+            var rpcItem = new RPC.Item(item.Id, item.Type, item.Position);
+            return rpcItem;
+        }
         void Environment(string id)
         {
-            var itemsRpc = new List<RPC.Item>();
-            foreach (var item in items.Values)
-            {
-                var itemRpc = new RPC.Item(item.Id, item.Type, item.Position);
-                itemsRpc.Add(itemRpc);
-            }
+            var rpcItems = items.Values
+                .Select(item => GetRpcItem(item))
+                .ToList();
 
-            var environmentRpc = new RPC.Environment(new EnvironmentPayload(itemsRpc));
+            var environmentRpc = new RPC.Environment(new EnvironmentPayload(rpcItems));
             var environmentJson = JsonConvert.SerializeObject(environmentRpc);
             sendTo(environmentJson, id);
         }
